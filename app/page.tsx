@@ -1,69 +1,54 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
+import { Search } from "lucide-react";
+import { useAppState } from "@/components/providers/AppStateProvider";
+import { PillarCard } from "@/components/home/PillarCard";
+import { RecommendedSection } from "@/components/home/RecommendedSection";
+import { HowItWorksStrip } from "@/components/home/HowItWorksStrip";
+import { Button } from "@/components/ui/Button";
+import { PILLAR_ORDER } from "@/lib/pillars";
+import { heritageList } from "@/data/heritages";
+import { formatLocation } from "@/services/geocodeService";
+
+export default function HomePage() {
+  const { user, hydrated } = useAppState();
+  const router = useRouter();
+  const hasRedirected = useRef(false);
+
+  useEffect(() => {
+    if (hydrated && !user.onboardingComplete && !hasRedirected.current) {
+      hasRedirected.current = true;
+      router.push("/onboarding");
+    }
+  }, [hydrated, user.onboardingComplete, router]);
+
+  const firstName = user.name.split(" ")[0];
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <div className="animate-fade-up">
+      <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+        <div>
+          <p className="text-sm font-medium text-brown-muted">
+            {user.heritages.length ? `${heritageList(user.heritages)} · ${formatLocation(user.location)}` : formatLocation(user.location)}
           </p>
+          <h1 className="mt-1 text-3xl font-semibold tracking-tight text-brown text-balance md:text-4xl">Welcome back, {firstName}.</h1>
+          <p className="mt-2 max-w-xl text-[15px] text-brown-muted">Three ways to reconnect: your community, your culture, and your future.</p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+        <Button href="/discover" variant="outline" size="lg" icon={<Search className="h-4 w-4" aria-hidden />} className="self-start">
+          Ask Onclave anything
+        </Button>
+      </div>
+
+      <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 md:mt-10">
+        {PILLAR_ORDER.map((p) => (
+          <PillarCard key={p} pillar={p} />
+        ))}
+      </div>
+
+      <RecommendedSection />
+      <HowItWorksStrip />
     </div>
   );
 }
