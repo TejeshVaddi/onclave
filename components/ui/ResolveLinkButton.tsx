@@ -32,13 +32,20 @@ interface Props {
  *
  * Opens a blank tab synchronously (before the async lookup) and redirects it
  * once resolved — the standard way to avoid popup blockers eating a tab
- * opened after an `await`.
+ * opened after an `await`. This only works if `window.open` returns an
+ * actual reference, which means NOT passing `noopener` to that first call
+ * (browsers return `null` when you do, making the tab impossible to
+ * navigate later — the classic cause of a popup that's stuck on
+ * about:blank forever). We still want the security property `noopener`
+ * gives — the destination site shouldn't get a `window.opener` back to
+ * this page — so we get a real reference first, then sever it ourselves.
  */
 export function ResolveLinkButton({ category, query, heritages = [], city = "", state = "", fallbackUrl, label, loadingLabel, variant = "culture", size, className, icon }: Props) {
   const [loading, setLoading] = useState(false);
 
   async function handleClick() {
-    const tab = window.open("", "_blank", "noopener,noreferrer");
+    const tab = window.open("", "_blank");
+    if (tab) tab.opener = null;
     setLoading(true);
     try {
       const res = await fetchLiveResults({ category, query, heritages, city, state });

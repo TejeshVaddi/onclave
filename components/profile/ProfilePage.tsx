@@ -31,7 +31,11 @@ export function ProfilePage() {
   const [activeEvent, setActiveEvent] = useState<CulturalEvent | null>(null);
 
   function retakeOnboarding() {
-    updateUser({ onboardingComplete: false });
+    // A full wipe, not just a field update — retaking the quiz means someone
+    // else (or a genuinely fresh start) is using the app now, so the old
+    // bio, saved communities/recipes/events, and connection requests
+    // shouldn't bleed into the new profile.
+    resetDemo();
     router.push("/onboarding");
   }
 

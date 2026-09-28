@@ -70,6 +70,9 @@ export function OnboardingFlow() {
       profession: profession || null,
       wantsMentorship: wantsMentorship === "yes",
       onboardingComplete: true,
+      // Not collected by this form — clear it explicitly rather than
+      // silently keeping whatever bio a previous profile had.
+      bio: undefined,
     });
     toast({ title: "Profile saved", description: "Your Community, Culture, and Profession feeds are now personalized.", variant: "success" });
     router.push("/");
