@@ -1,26 +1,25 @@
 import type { User } from "@/types";
 
 /**
- * Demo profile loaded when no saved profile exists. Judges can open the app
- * and immediately see a personalized experience without signing in.
+ * Blank starting profile. This is a demo, not a real product, so every
+ * visitor (and anyone who resets or retakes the quiz) goes through
+ * onboarding themselves rather than landing on a pre-filled persona —
+ * `onboardingComplete: false` sends them straight to /onboarding from the
+ * home page.
  */
 export const DEMO_USER: User = {
-  id: "u-demo-alex",
-  name: "Alex Okafor",
-  initials: "AO",
+  id: "u-guest",
+  name: "",
+  initials: "",
   avatarTone: "green",
-  heritages: ["nigerian"],
+  heritages: [],
   location: {
-    city: "Fairfax",
-    state: "VA",
+    city: "",
     country: "United States",
-    lat: 38.8462,
-    lng: -77.3064,
   },
-  interests: ["food", "music", "festivals", "community", "stem"],
-  profession: "software-engineering",
-  wantsMentorship: true,
-  bio: "High school senior in Fairfax County. Second-generation Nigerian-American figuring out how to stay close to my roots while building a career in tech.",
-  onboardingComplete: true,
-  updatedAt: "2026-09-01T12:00:00.000Z",
+  interests: [],
+  profession: null,
+  wantsMentorship: false,
+  onboardingComplete: false,
+  updatedAt: new Date(0).toISOString(),
 };

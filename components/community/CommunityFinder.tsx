@@ -19,7 +19,6 @@ import { DetectedSignals } from "@/components/ui/DetectedSignals";
 import { LiveResultsSection } from "@/components/ui/LiveResultsSection";
 import { COMMUNITY_TYPES, PLATFORMS, searchCommunities, type CommunityFilters } from "@/services/communityService";
 import { parseFreeText } from "@/services/smartSearch";
-import { HERITAGES } from "@/data/heritages";
 import { toggleIn } from "@/lib/hooks";
 import { uniq } from "@/lib/utils";
 import type { CommunityPlatform, CommunityType } from "@/types";
@@ -30,14 +29,14 @@ export function CommunityFinder() {
 
   const [query, setQuery] = useState("");
   const debouncedQuery = useDebouncedValue(query, 200);
-  const [heritages, setHeritages] = useState<string[]>(user.heritages);
   const [types, setTypes] = useState<CommunityType[]>([]);
   const [platforms, setPlatforms] = useState<CommunityPlatform[]>([]);
   const [locationMode, setLocationMode] = useState<"all" | "online" | "local">("all");
-  const [showAllHeritages, setShowAllHeritages] = useState(false);
 
   const signals = useMemo(() => parseFreeText(debouncedQuery), [debouncedQuery]);
-  const effectiveHeritages = useMemo(() => uniq([...heritages, ...signals.heritages]), [heritages, signals.heritages]);
+  // Heritage already comes from onboarding — the search bar only needs to
+  // layer in whatever heritage the text itself mentions.
+  const effectiveHeritages = useMemo(() => uniq([...user.heritages, ...signals.heritages]), [user.heritages, signals.heritages]);
   const effectiveTypes = useMemo(() => uniq([...types, ...signals.communityTypes]) as CommunityType[], [types, signals.communityTypes]);
   const effectivePlatforms = useMemo(
     () => uniq([...platforms, ...signals.communityPlatforms]) as CommunityPlatform[],
@@ -69,12 +68,10 @@ export function CommunityFinder() {
   const { data, loading } = useAsyncData(() => searchCommunities(filters, 5), key, { keepPrevious: true });
   const communities = data?.items ?? [];
 
-  const visibleHeritages = showAllHeritages ? HERITAGES : HERITAGES.slice(0, 10);
-  const hasFilters = heritages.length > 0 || types.length > 0 || platforms.length > 0 || locationMode !== "all" || query.length > 0;
+  const hasFilters = types.length > 0 || platforms.length > 0 || locationMode !== "all" || query.length > 0;
 
   function clearAll() {
     setQuery("");
-    setHeritages([]);
     setTypes([]);
     setPlatforms([]);
     setLocationMode("all");
@@ -94,7 +91,7 @@ export function CommunityFinder() {
       />
 
       <div className="space-y-4 rounded-3xl border border-beige bg-white/40 p-4 md:p-5">
-        <SearchInput value={query} onChange={setQuery} placeholder="Search communities, e.g. “Nigerian students” or “Indian families”" aria-label="Search communities" />
+        <SearchInput value={query} onChange={setQuery} placeholder="Search communities" aria-label="Search communities" />
         <DetectedSignals signals={signals} />
 
         <div className="flex flex-wrap items-center justify-between gap-3">
@@ -113,20 +110,6 @@ export function CommunityFinder() {
               Clear filters
             </Button>
           ) : null}
-        </div>
-
-        <div>
-          <p className="mb-2 text-xs font-bold uppercase tracking-wider text-brown-faint">Heritage</p>
-          <ChipRow>
-            {visibleHeritages.map((h) => (
-              <Chip key={h.id} size="sm" pillar="community" selected={heritages.includes(h.id)} onClick={() => setHeritages((prev) => toggleIn(prev, h.id))}>
-                {h.label}
-              </Chip>
-            ))}
-            <button type="button" onClick={() => setShowAllHeritages((v) => !v)} className="shrink-0 text-xs font-semibold text-brown-muted underline-offset-4 hover:underline">
-              {showAllHeritages ? "Show less" : `+${HERITAGES.length - 10} more`}
-            </button>
-          </ChipRow>
         </div>
 
         <div>

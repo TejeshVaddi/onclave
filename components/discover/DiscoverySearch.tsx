@@ -8,7 +8,7 @@ import { DiscoveryResults } from "./DiscoveryResults";
 import { DiscoveryLiveResults } from "./DiscoveryLiveResults";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { DemoNote } from "@/components/ui/DemoNote";
-import { discoveryProvider, EXAMPLE_QUERIES } from "@/services/discovery";
+import { discoveryProvider } from "@/services/discovery";
 import { cn } from "@/lib/utils";
 
 const SCOPE_OPTIONS: { id: DiscoveryScope; label: string }[] = [
@@ -88,12 +88,12 @@ export function DiscoverySearch() {
           rows={2}
           placeholder={
             scope === "community"
-              ? `e.g. "Discord servers for Filipino students"`
+              ? "Describe the community you're looking for"
               : scope === "culture"
-                ? `e.g. "How to make semiya payasam" or "temples near me"`
+                ? "Ask about a recipe, restaurant, temple, or event"
                 : scope === "profession"
-                  ? `e.g. "Mentorship programs for Vietnamese engineers"`
-                  : `e.g. "I'm Nigerian-American, interested in medicine, and want to connect with my culture this weekend."`
+                  ? "Ask about a mentor or professional program"
+                  : "Describe what you're looking for"
           }
           className="w-full resize-none rounded-2xl border border-beige-deep bg-cream py-3.5 pl-12 pr-32 text-[15px] text-brown placeholder:text-brown-faint shadow-soft transition focus:border-brown focus:outline-none focus:ring-2 focus:ring-brown/70"
           aria-label="Describe what you're looking for"
@@ -111,24 +111,6 @@ export function DiscoverySearch() {
           {loading ? "Searching" : "Search"}
         </button>
       </form>
-
-      {!result && !loading ? (
-        <div className="mt-4 flex flex-wrap gap-2">
-          {EXAMPLE_QUERIES.map((q) => (
-            <button
-              key={q}
-              type="button"
-              onClick={() => {
-                setQuery(q);
-                runSearch(q);
-              }}
-              className="rounded-full border border-beige-deep bg-beige-soft/60 px-3.5 py-1.5 text-left text-xs font-medium text-brown-muted transition hover:border-brown-faint hover:bg-beige-soft hover:text-brown"
-            >
-              “{q}”
-            </button>
-          ))}
-        </div>
-      ) : null}
 
       <div className="mt-8" aria-live="polite">
         {loading ? (

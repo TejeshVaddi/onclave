@@ -1,11 +1,12 @@
 "use client";
 
-import { Bookmark, BookmarkCheck, Clock, MapPin, Video } from "lucide-react";
+import { Bookmark, BookmarkCheck, Clock, ExternalLink, MapPin, Video } from "lucide-react";
 import type { CulturalEvent, RecommendationReason } from "@/types";
 import { Card } from "@/components/ui/Card";
 import { Badge, Tag } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { MatchReasons } from "@/components/ui/MatchReasons";
+import { EventLinkButton } from "@/components/culture/EventLinkButton";
 import { eventCategoryLabel } from "@/services/eventService";
 import { parseLocalDate, relativeDayLabel } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -85,10 +86,11 @@ export function EventCard({ event: e, saved, onToggleSave, onLearnMore, reasons,
 
       {reasons?.length ? <MatchReasons reasons={reasons} score={score} className="mt-3" /> : null}
 
-      <div className="mt-4 pt-1">
+      <div className="mt-4 flex flex-wrap gap-2 pt-1">
         <Button variant="culture" size="sm" onClick={() => onLearnMore?.(e)}>
           Learn More
         </Button>
+        <EventLinkButton event={e} variant="outline" size="sm" icon={<ExternalLink className="h-3.5 w-3.5" aria-hidden />} />
       </div>
     </Card>
   );

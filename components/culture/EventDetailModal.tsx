@@ -5,6 +5,7 @@ import type { CulturalEvent } from "@/types";
 import { Modal } from "@/components/ui/Modal";
 import { Badge, Tag } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
+import { EventLinkButton } from "@/components/culture/EventLinkButton";
 import { eventCategoryLabel } from "@/services/eventService";
 import { formatDateRange } from "@/lib/format";
 import { heritageList } from "@/data/heritages";
@@ -36,14 +37,12 @@ export function EventDetailModal({
           <Button variant="ghost" onClick={() => onToggleSave(e.id)} icon={saved ? <BookmarkCheck className="h-4 w-4 text-berry" aria-hidden /> : <Bookmark className="h-4 w-4" aria-hidden />}>
             {saved ? "Saved" : "Save event"}
           </Button>
-          <Button
-            variant="culture"
-            href={e.externalUrl ?? mapsUrl(`${e.venue}, ${e.city}, ${e.state}`)}
-            external
-            iconRight={<ExternalLink className="h-4 w-4" aria-hidden />}
-          >
-            {e.externalUrl ? "Event details" : "View venue"}
-          </Button>
+          {!e.isVirtual ? (
+            <Button variant="outline" href={mapsUrl(`${e.venue}, ${e.city}, ${e.state}`)} external iconRight={<ExternalLink className="h-4 w-4" aria-hidden />}>
+              Directions
+            </Button>
+          ) : null}
+          <EventLinkButton event={e} icon={<ExternalLink className="h-4 w-4" aria-hidden />} />
         </>
       }
     >

@@ -295,11 +295,3 @@ export const localDiscoveryProvider: DiscoveryProvider = {
 };
 
 export const discoveryProvider: DiscoveryProvider = localDiscoveryProvider;
-
-export const EXAMPLE_QUERIES = [
-  "I'm Nigerian-American, interested in medicine, and want to connect with my culture this weekend.",
-  "Where can I find Ethiopian food and a coffee ceremony near me?",
-  "Mexican-American student looking for a mentor in engineering",
-  "Vietnamese festivals and recipes for Mid-Autumn",
-  "Indian pre-med student who wants community and a temple nearby",
-];

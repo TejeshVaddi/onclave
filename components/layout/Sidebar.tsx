@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CircleHelp, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { Logo } from "./Logo";
 import { ACTIVE_BG, ACTIVE_TEXT, DISCOVER_NAV, PRIMARY_NAV, isActivePath } from "./nav";
 import { Avatar } from "@/components/ui/Avatar";
@@ -69,19 +69,6 @@ export function Sidebar() {
             AI Discovery
           </Link>
         </div>
-
-        <Link
-          href="/how-it-works"
-          aria-current={isActivePath(pathname, "/how-it-works") ? "page" : undefined}
-          className={cn(
-            "mt-1 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all",
-            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brown",
-            isActivePath(pathname, "/how-it-works") ? "bg-beige text-brown" : "text-brown-muted hover:bg-beige-soft hover:text-brown",
-          )}
-        >
-          <CircleHelp className="h-5 w-5" aria-hidden />
-          How it works
-        </Link>
       </nav>
 
       <div className="border-t border-beige/80 p-4">

@@ -228,17 +228,17 @@ export const COMMUNITIES: CommunityRecord[] = [
   },
   {
     id: "c-temple-youth-fairfax",
-    name: "Hindu Temple Youth Group · Fairfax",
+    name: "Sri Siva Vishnu Temple Bala Vihar",
     platform: "other",
     description:
-      "Weekly youth gatherings blending seva (service) projects, bhajan practice, and discussions on living Hindu values in America.",
-    locationLabel: "Fairfax, VA",
+      "The youth education program at Sri Siva Vishnu Temple: weekly seva (service) projects, bhajan practice, and classes on Hindu values and scripture for kids and teens.",
+    locationLabel: "Lanham, MD",
     geo: GEO.fairfax,
     isOnline: false,
     heritages: ["indian"],
     type: "religious",
     tags: ["Indian", "Faith", "Youth"],
-    externalUrl: web("Hindu temple youth group Fairfax Virginia"),
+    externalUrl: web("Sri Siva Vishnu Temple Bala Vihar"),
     linkKind: "search",
   },
 

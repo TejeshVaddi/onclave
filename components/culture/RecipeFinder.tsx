@@ -16,7 +16,6 @@ import { DetectedSignals } from "@/components/ui/DetectedSignals";
 import { LiveResultsSection } from "@/components/ui/LiveResultsSection";
 import { DIFFICULTIES, searchRecipes, type RecipeFilters } from "@/services/recipeService";
 import { parseFreeText } from "@/services/smartSearch";
-import { HERITAGES } from "@/data/heritages";
 import { toggleIn } from "@/lib/hooks";
 import { uniq } from "@/lib/utils";
 import type { Difficulty } from "@/types";
@@ -27,11 +26,12 @@ export function RecipeFinder() {
 
   const [query, setQuery] = useState("");
   const debouncedQuery = useDebouncedValue(query, 200);
-  const [heritages, setHeritages] = useState<string[]>(user.heritages);
   const [difficulty, setDifficulty] = useState<Difficulty[]>([]);
 
   const signals = useMemo(() => parseFreeText(debouncedQuery), [debouncedQuery]);
-  const effectiveHeritages = useMemo(() => uniq([...heritages, ...signals.heritages]), [heritages, signals.heritages]);
+  // Heritage already comes from onboarding — the search bar only needs to
+  // layer in whatever heritage the text itself mentions.
+  const effectiveHeritages = useMemo(() => uniq([...user.heritages, ...signals.heritages]), [user.heritages, signals.heritages]);
   const queryHandledStructurally = signals.heritages.length > 0 || signals.dietary.length > 0;
 
   const filters: RecipeFilters = useMemo(
@@ -53,25 +53,14 @@ export function RecipeFinder() {
 
   function clearAll() {
     setQuery("");
-    setHeritages([]);
     setDifficulty([]);
   }
 
   return (
     <div>
       <div className="space-y-4 rounded-3xl border border-beige bg-white/40 p-4 md:p-5">
-        <SearchInput value={query} onChange={setQuery} placeholder={`Search recipes, e.g. “vegan Nigerian jollof” or “gluten-free Turkish”`} aria-label="Search recipes" />
+        <SearchInput value={query} onChange={setQuery} placeholder="Search recipes" aria-label="Search recipes" />
         <DetectedSignals signals={signals} />
-        <div>
-          <p className="mb-2 text-xs font-bold uppercase tracking-wider text-brown-faint">Heritage</p>
-          <ChipRow>
-            {HERITAGES.slice(0, 12).map((h) => (
-              <Chip key={h.id} size="sm" pillar="culture" selected={heritages.includes(h.id)} onClick={() => setHeritages((prev) => toggleIn(prev, h.id))}>
-                {h.label}
-              </Chip>
-            ))}
-          </ChipRow>
-        </div>
         <div>
           <p className="mb-2 text-xs font-bold uppercase tracking-wider text-brown-faint">Difficulty</p>
           <ChipRow>
@@ -101,7 +90,7 @@ export function RecipeFinder() {
           <EmptyState
             icon={<ChefHat className="h-6 w-6" aria-hidden />}
             title="No recipes match those filters"
-            description="Try a different heritage or clear your filters."
+            description="Try a different difficulty or clear your filters."
             action={
               <Button variant="culture" size="sm" onClick={clearAll}>
                 Clear filters

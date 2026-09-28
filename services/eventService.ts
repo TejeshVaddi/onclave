@@ -95,3 +95,21 @@ export async function getEvent(id: string): Promise<CulturalEvent | undefined> {
   const all = await dataSource.getEvents();
   return all.find((e) => e.id === id);
 }
+
+/**
+ * The demo dataset doesn't have real ticket/website URLs for its events, so
+ * this always returns *something* actionable: the event's own URL when we
+ * have one, otherwise a Google search built to surface the event's real
+ * website or ticket page (Eventbrite, the venue, etc.) rather than leaving
+ * the person with only a map pin.
+ */
+export function eventLinkUrl(e: CulturalEvent): string {
+  if (e.externalUrl) return e.externalUrl;
+  const parts = [e.name, e.venue, e.city, e.price === "Free" ? "" : "tickets"].filter(Boolean);
+  return `https://www.google.com/search?q=${encodeURIComponent(parts.join(" "))}`;
+}
+
+export function eventLinkLabel(e: CulturalEvent): string {
+  if (e.externalUrl) return e.price === "Free" ? "Event website" : "Get tickets";
+  return e.price === "Free" ? "Search for event details" : "Search for tickets";
+}

@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { BookmarkCheck, CalendarCheck, ChefHat, ListChecks, Pencil, RotateCcw, Sparkles, Users } from "lucide-react";
+import { CalendarCheck, ChefHat, ListChecks, Pencil, RotateCcw, Sparkles, Users } from "lucide-react";
 import { useAppState } from "@/components/providers/AppStateProvider";
 import { useToast } from "@/components/providers/ToastProvider";
 import { EditProfileModal } from "./EditProfileModal";
@@ -154,9 +154,9 @@ export function ProfilePage() {
         <div className="flex flex-col items-start justify-between gap-3 rounded-2xl border border-dashed border-beige-deep p-4 sm:flex-row sm:items-center">
           <div>
             <p className="flex items-center gap-1.5 text-sm font-semibold text-brown">
-              <BookmarkCheck className="h-4 w-4" aria-hidden /> Demo profile
+              <RotateCcw className="h-4 w-4" aria-hidden /> Start over
             </p>
-            <p className="mt-0.5 text-xs text-brown-muted">Reset to the original demo data and preferences.</p>
+            <p className="mt-0.5 text-xs text-brown-muted">Erase your profile, saved items, and connection requests, and go through onboarding again.</p>
           </div>
           <Button
             variant="ghost"
@@ -164,10 +164,10 @@ export function ProfilePage() {
             icon={<RotateCcw className="h-4 w-4" aria-hidden />}
             onClick={() => {
               resetDemo();
-              toast({ title: "Demo reset", description: "Your profile and saved items were restored to the defaults." });
+              toast({ title: "Profile cleared", description: "Your profile and saved items were cleared." });
             }}
           >
-            Reset demo
+            Clear my profile
           </Button>
         </div>
       </section>

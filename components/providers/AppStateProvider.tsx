@@ -35,7 +35,7 @@ const STORAGE_KEY = "state";
 
 const defaultPersisted: PersistedState = {
   user: DEMO_USER,
-  savedCommunityIds: ["c-nsa-gmu", "c-nigeria-reddit"],
+  savedCommunityIds: [],
   savedEventIds: [],
   savedRecipeIds: [],
   connectionRequests: {},

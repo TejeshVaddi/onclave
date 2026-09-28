@@ -16,7 +16,6 @@ import { DetectedSignals } from "@/components/ui/DetectedSignals";
 import { LiveResultsSection } from "@/components/ui/LiveResultsSection";
 import { FOOD_CATEGORIES, searchPlaces } from "@/services/placeService";
 import { parseFreeText } from "@/services/smartSearch";
-import { HERITAGES } from "@/data/heritages";
 import { toggleIn } from "@/lib/hooks";
 import { uniq } from "@/lib/utils";
 import type { FoodPlaceCategory } from "@/types";
@@ -25,11 +24,12 @@ export function FoodNearYou() {
   const { user } = useAppState();
   const [query, setQuery] = useState("");
   const debouncedQuery = useDebouncedValue(query, 200);
-  const [heritages, setHeritages] = useState<string[]>(user.heritages);
   const [categories, setCategories] = useState<FoodPlaceCategory[]>([]);
 
   const signals = useMemo(() => parseFreeText(debouncedQuery), [debouncedQuery]);
-  const effectiveHeritages = useMemo(() => uniq([...heritages, ...signals.heritages]), [heritages, signals.heritages]);
+  // Heritage already comes from onboarding — the search bar only needs to
+  // layer in whatever heritage the text itself mentions.
+  const effectiveHeritages = useMemo(() => uniq([...user.heritages, ...signals.heritages]), [user.heritages, signals.heritages]);
   const effectiveCategories = useMemo(
     () => uniq([...categories, ...signals.foodCategories]) as FoodPlaceCategory[],
     [categories, signals.foodCategories],
@@ -52,7 +52,6 @@ export function FoodNearYou() {
 
   function clearAll() {
     setQuery("");
-    setHeritages([]);
     setCategories([]);
   }
 
@@ -61,16 +60,6 @@ export function FoodNearYou() {
       <div className="space-y-4 rounded-3xl border border-beige bg-white/40 p-4 md:p-5">
         <SearchInput value={query} onChange={setQuery} placeholder="Search restaurants, groceries, bakeries…" aria-label="Search food near you" />
         <DetectedSignals signals={signals} />
-        <div>
-          <p className="mb-2 text-xs font-bold uppercase tracking-wider text-brown-faint">Heritage</p>
-          <ChipRow>
-            {HERITAGES.slice(0, 12).map((h) => (
-              <Chip key={h.id} size="sm" pillar="culture" selected={heritages.includes(h.id)} onClick={() => setHeritages((prev) => toggleIn(prev, h.id))}>
-                {h.label}
-              </Chip>
-            ))}
-          </ChipRow>
-        </div>
         <div>
           <p className="mb-2 text-xs font-bold uppercase tracking-wider text-brown-faint">Category</p>
           <ChipRow>
@@ -100,7 +89,7 @@ export function FoodNearYou() {
           <EmptyState
             icon={<UtensilsCrossed className="h-6 w-6" aria-hidden />}
             title="No places match those filters"
-            description="Try a different heritage or clear your filters."
+            description="Try a different category or clear your filters."
             action={
               <Button variant="culture" size="sm" onClick={clearAll}>
                 Clear filters

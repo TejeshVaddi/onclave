@@ -6,7 +6,6 @@ import { Search } from "lucide-react";
 import { useAppState } from "@/components/providers/AppStateProvider";
 import { PillarCard } from "@/components/home/PillarCard";
 import { RecommendedSection } from "@/components/home/RecommendedSection";
-import { HowItWorksStrip } from "@/components/home/HowItWorksStrip";
 import { Button } from "@/components/ui/Button";
 import { PILLAR_ORDER } from "@/lib/pillars";
 import { heritageList } from "@/data/heritages";
@@ -48,7 +47,6 @@ export default function HomePage() {
       </div>
 
       <RecommendedSection />
-      <HowItWorksStrip />
     </div>
   );
 }

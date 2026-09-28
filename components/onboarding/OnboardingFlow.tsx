@@ -110,7 +110,7 @@ export function OnboardingFlow() {
                 id="onboarding-name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="e.g. Alex Okafor"
+                placeholder="Your name"
                 autoComplete="name"
                 autoFocus
               />
@@ -141,7 +141,7 @@ export function OnboardingFlow() {
                     id="onboarding-city"
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
-                    placeholder="e.g. Fairfax"
+                    placeholder="Your city"
                     autoComplete="off"
                   />
                   {citySuggestions.length > 0 && city.length > 1 && (
@@ -166,8 +166,8 @@ export function OnboardingFlow() {
                   )}
                 </div>
                 <div className="grid grid-cols-2 gap-4">
-                  <Input label="State / Province" value={state} onChange={(e) => setState(e.target.value)} placeholder="e.g. VA" />
-                  <Input label="Country" value={country} onChange={(e) => setCountry(e.target.value)} placeholder="e.g. United States" />
+                  <Input label="State / Province" value={state} onChange={(e) => setState(e.target.value)} placeholder="State / Province" />
+                  <Input label="Country" value={country} onChange={(e) => setCountry(e.target.value)} placeholder="Country" />
                 </div>
               </div>
             </StepShell>

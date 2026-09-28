@@ -1,9 +1,9 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowLeft, ChefHat, Clock, ExternalLink, Users2, UtensilsCrossed } from "lucide-react";
+import { ArrowLeft, ChefHat, Clock, Users2, UtensilsCrossed } from "lucide-react";
 import { RECIPES } from "@/data/recipes";
-import { getRecipe, recipeSearchUrl } from "@/services/recipeService";
+import { getRecipe } from "@/services/recipeService";
 import { heritageLabel } from "@/data/heritages";
 import { formatMinutes } from "@/lib/format";
 import { Badge, Tag } from "@/components/ui/Badge";
@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/Button";
 import { CoverArt } from "@/components/ui/CoverArt";
 import { DemoNote } from "@/components/ui/DemoNote";
 import { IngredientsNearYou } from "@/components/culture/IngredientsNearYou";
+import { FindFullRecipeButton } from "@/components/culture/FindFullRecipeButton";
 
 export function generateStaticParams() {
   return RECIPES.map((r) => ({ id: r.id }));
@@ -94,22 +95,14 @@ export default async function RecipeDetailPage({ params }: PageProps<"/culture/r
           <p className="mt-6 text-xs text-brown-faint">Source: {recipe.sourceName}</p>
 
           <div className="mt-5 flex flex-wrap gap-3">
-            {recipe.sourceUrl ? (
-              <Button variant="culture" href={recipe.sourceUrl} external iconRight={<ExternalLink className="h-4 w-4" aria-hidden />}>
-                View full recipe
-              </Button>
-            ) : (
-              <Button variant="culture" href={recipeSearchUrl(recipe)} external iconRight={<ExternalLink className="h-4 w-4" aria-hidden />}>
-                Find the full recipe
-              </Button>
-            )}
+            <FindFullRecipeButton recipe={recipe} />
             <Button variant="outline" href="/culture?tab=recipes">
               Browse more recipes
             </Button>
           </div>
 
           <DemoNote className="mt-6">
-            This is an original short summary written for the Onclave demo, not a copied recipe. When a licensed recipe API is connected, this page will show the source&apos;s full recipe and link directly to it.
+            This is an original short summary written for the Onclave demo, not a copied recipe. &quot;Find the full recipe&quot; asks Gemini (or Groq, as backup) for a real, current recipe for this dish and opens it directly — falling back to a Google search only if AI lookup is unavailable.
           </DemoNote>
         </div>
       </div>

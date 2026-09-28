@@ -1,14 +1,14 @@
 "use client";
 
 import Image from "next/image";
-import { Church, ExternalLink, Landmark, MapPin, ShoppingBasket, Star, Store, UtensilsCrossed, Coffee, Croissant, Building2 } from "lucide-react";
+import { Church, Landmark, MapPin, ShoppingBasket, Star, Store, UtensilsCrossed, Coffee, Croissant, Building2 } from "lucide-react";
 import type { Place, RecommendationReason } from "@/types";
 import { Card } from "@/components/ui/Card";
 import { Badge, Tag } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
 import { CoverArt } from "@/components/ui/CoverArt";
 import { MatchReasons } from "@/components/ui/MatchReasons";
-import { placeCategoryLabel, placeMapUrl } from "@/services/placeService";
+import { PlaceLinkButton } from "@/components/culture/PlaceLinkButton";
+import { placeCategoryLabel } from "@/services/placeService";
 import { formatDistance } from "@/lib/geo";
 import { cn } from "@/lib/utils";
 
@@ -77,9 +77,7 @@ export function PlaceCard({ place: p, distanceMiles, reasons, score }: Props) {
         </div>
         {reasons?.length ? <MatchReasons reasons={reasons} score={score} className="mt-3" /> : null}
         <div className="mt-4 pt-1">
-          <Button variant="culture" size="sm" href={placeMapUrl(p)} external iconRight={<ExternalLink className="h-3.5 w-3.5" aria-hidden />}>
-            View Location
-          </Button>
+          <PlaceLinkButton place={p} size="sm" />
         </div>
       </div>
     </Card>

@@ -1,12 +1,11 @@
 "use client";
 
-import { Bookmark, BookmarkCheck, ExternalLink, Globe, MapPin } from "lucide-react";
+import { Bookmark, BookmarkCheck, Globe, MapPin } from "lucide-react";
 import type { Community, RecommendationReason } from "@/types";
-import type { CommunityRecord } from "@/data/communities";
 import { Card } from "@/components/ui/Card";
 import { Badge, Tag } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
 import { MatchReasons } from "@/components/ui/MatchReasons";
+import { CommunityLinkButton } from "@/components/community/CommunityLinkButton";
 import { communityTypeLabel, platformLabel } from "@/services/communityService";
 import { cn } from "@/lib/utils";
 
@@ -29,7 +28,6 @@ const PLATFORM_MONO: Record<Community["platform"], string> = {
 };
 
 export function CommunityCard({ community: c, saved, onToggleSave, reasons, score, compact }: Props) {
-  const isSearchLink = (c as CommunityRecord).linkKind === "search";
   return (
     <Card as="article" pillar="community" interactive className={cn("flex flex-col", compact && "p-4")}>
       <div className="flex items-start gap-3">
@@ -81,10 +79,7 @@ export function CommunityCard({ community: c, saved, onToggleSave, reasons, scor
       {reasons?.length ? <MatchReasons reasons={reasons} score={score} className="mt-3" /> : null}
 
       <div className="mt-4 flex items-center gap-2 pt-1">
-        <Button variant="community" size="sm" href={c.externalUrl} external iconRight={<ExternalLink className="h-3.5 w-3.5" aria-hidden />}>
-          Visit Community
-        </Button>
-        {isSearchLink ? <span className="text-[11px] text-brown-faint">Opens platform search</span> : null}
+        <CommunityLinkButton community={c} size="sm" />
       </div>
     </Card>
   );

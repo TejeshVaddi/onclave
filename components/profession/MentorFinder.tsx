@@ -19,9 +19,6 @@ import { DetectedSignals } from "@/components/ui/DetectedSignals";
 import { LiveResultsSection } from "@/components/ui/LiveResultsSection";
 import { EXPERIENCE_BANDS, searchMentors, type MentorFilters } from "@/services/mentorService";
 import { parseFreeText } from "@/services/smartSearch";
-import { HERITAGES } from "@/data/heritages";
-import { PROFESSIONS } from "@/data/professions";
-import { toggleIn } from "@/lib/hooks";
 import { uniq } from "@/lib/utils";
 import type { Mentor } from "@/types";
 
@@ -31,16 +28,19 @@ export function MentorFinder() {
 
   const [query, setQuery] = useState("");
   const debouncedQuery = useDebouncedValue(query, 200);
-  const [heritages, setHeritages] = useState<string[]>(user.heritages);
-  const [professions, setProfessions] = useState<string[]>(user.profession ? [user.profession] : []);
   const [experienceBand, setExperienceBand] = useState<string | null>(null);
   const [activeMentor, setActiveMentor] = useState<Mentor | null>(null);
 
   const band = EXPERIENCE_BANDS.find((b) => b.id === experienceBand);
 
   const signals = useMemo(() => parseFreeText(debouncedQuery), [debouncedQuery]);
-  const effectiveHeritages = useMemo(() => uniq([...heritages, ...signals.heritages]), [heritages, signals.heritages]);
-  const effectiveProfessions = useMemo(() => uniq([...professions, ...signals.professions]), [professions, signals.professions]);
+  // Heritage and profession already come from onboarding — the search bar
+  // only needs to layer in what the text itself mentions.
+  const effectiveHeritages = useMemo(() => uniq([...user.heritages, ...signals.heritages]), [user.heritages, signals.heritages]);
+  const effectiveProfessions = useMemo(
+    () => uniq([...(user.profession ? [user.profession] : []), ...signals.professions]),
+    [user.profession, signals.professions],
+  );
   const queryHandledStructurally = signals.heritages.length > 0 || signals.professions.length > 0;
 
   const filters: MentorFilters = useMemo(
@@ -60,8 +60,6 @@ export function MentorFinder() {
 
   function clearAll() {
     setQuery("");
-    setHeritages([]);
-    setProfessions([]);
     setExperienceBand(null);
   }
 
@@ -81,28 +79,8 @@ export function MentorFinder() {
       />
 
       <div className="space-y-4 rounded-3xl border border-beige bg-white/40 p-4 md:p-5">
-        <SearchInput value={query} onChange={setQuery} placeholder="Search mentors, e.g. “Ethiopian doctor” or a name" aria-label="Search mentors" />
+        <SearchInput value={query} onChange={setQuery} placeholder="Search mentors" aria-label="Search mentors" />
         <DetectedSignals signals={signals} />
-        <div>
-          <p className="mb-2 text-xs font-bold uppercase tracking-wider text-brown-faint">Profession</p>
-          <ChipRow>
-            {PROFESSIONS.map((p) => (
-              <Chip key={p.id} size="sm" pillar="profession" selected={professions.includes(p.id)} onClick={() => setProfessions((prev) => toggleIn(prev, p.id))}>
-                {p.label}
-              </Chip>
-            ))}
-          </ChipRow>
-        </div>
-        <div>
-          <p className="mb-2 text-xs font-bold uppercase tracking-wider text-brown-faint">Heritage</p>
-          <ChipRow>
-            {HERITAGES.slice(0, 12).map((h) => (
-              <Chip key={h.id} size="sm" pillar="profession" selected={heritages.includes(h.id)} onClick={() => setHeritages((prev) => toggleIn(prev, h.id))}>
-                {h.label}
-              </Chip>
-            ))}
-          </ChipRow>
-        </div>
         <div>
           <p className="mb-2 text-xs font-bold uppercase tracking-wider text-brown-faint">Experience</p>
           <ChipRow>
