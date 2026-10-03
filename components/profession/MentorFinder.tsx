@@ -66,7 +66,7 @@ export function MentorFinder() {
   function handleSend(mentorId: string, message: string) {
     requestConnection(mentorId, message);
     const mentor = mentors.find((m) => m.id === mentorId);
-    toast({ title: "Connection request sent", description: mentor ? `${mentor.name} will see your message.` : undefined, pillar: "profession" });
+    toast({ title: "Request saved", description: mentor ? `Saved to your profile. ${mentor.name} is an example profile, so nothing was sent.` : undefined, pillar: "profession" });
     setActiveMentor(null);
   }
 

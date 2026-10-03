@@ -22,7 +22,7 @@ export const SCHEMAS_BY_CATEGORY: Record<LiveSearchCategory, string> = {
   places:
     '{"name": string, "category": one of "temple"|"mosque"|"church"|"cultural-center"|"museum"|"heritage-site"|"community-center", "description": string (1-2 sentences), "address": string, "city": string, "state": string, "rating": number (optional, 1-5), "tags": string[], "externalUrl": string (optional)}',
   events:
-    '{"name": string, "date": string (ISO YYYY-MM-DD if known, else omit), "venue": string, "city": string, "state": string, "description": string (1-2 sentences), "category": one of "festival"|"religious"|"community"|"workshop"|"performance"|"food", "organizer": string (optional), "price": string (optional, e.g. "Free" or "$10"), "tags": string[], "externalUrl": string (optional)}',
+    '{"name": string, "date": string (ISO YYYY-MM-DD if known, else omit), "venue": string, "city": string, "state": string, "description": string (1-2 sentences), "category": one of "festival"|"religious"|"community"|"workshop"|"performance"|"food", "organizer": string (optional, the group or venue putting it on), "price": string (optional, e.g. "Free" or "$10"), "address": string (optional, the venue street address), "performers": string[] (optional, named performers, speakers, or hosts, only if the source lists them), "ticketInfo": string (optional, where and how to buy tickets or RSVP), "tags": string[], "externalUrl": string (optional, the official event or ticket page, only if real)}',
   recipe:
     '{"name": string, "sourceName": string (the publisher/website name, e.g. "Serious Eats"), "description": string (1-2 sentences, original wording, not copied from the source), "difficulty": one of "easy"|"medium"|"hard", "timeMinutes": number, "tags": string[], "externalUrl": string (optional — include it if you know the real recipe page URL, but omit it rather than guessing; the dish name and source website are still useful without one)}',
   mentorProgram:
@@ -117,16 +117,34 @@ export function extractJsonArray(text: string): unknown[] {
   }
 }
 
+const SEARCH_HOSTS = /(^|\.)(google|bing|duckduckgo|yahoo|baidu|ecosia|startpage)\.[a-z.]+$/i;
+
 /**
- * A confident, specific URL is the exception, not the norm, especially
- * without search grounding — but a good name is still useful. Rather than
- * discarding a plausible suggestion just because the model wouldn't commit
- * to an exact link, fall back to a search URL so every result stays
- * actionable, the same pattern the local recipe cards already use when
- * `sourceUrl` is null (see services/recipeService.ts recipeSearchUrl).
+ * Only a real, specific destination counts as a link. Anything that isn't
+ * plain http(s), or that is just a search-results page (a search engine, or
+ * a platform's own group/event search), is dropped: a result is better off
+ * with no link than with one that dumps the person on a list of search hits.
+ * Model output is untrusted text, so this also keeps `javascript:` and other
+ * schemes out of an href.
  */
-export function fallbackSearchUrl(name: string, extra: string): string {
-  return `https://www.google.com/search?q=${encodeURIComponent(`${name} ${extra}`)}`;
+export function realDestinationUrl(raw: unknown): string | undefined {
+  if (!isNonEmptyString(raw)) return undefined;
+  let u: URL;
+  try {
+    u = new URL(raw.trim());
+  } catch {
+    return undefined;
+  }
+  if (u.protocol !== "https:" && u.protocol !== "http:") return undefined;
+  const host = u.hostname.toLowerCase();
+  const path = u.pathname.toLowerCase();
+  if (SEARCH_HOSTS.test(host) && (path === "/" || path.startsWith("/search") || path.startsWith("/url"))) return undefined;
+  if (/(^|\.)facebook\.com$/.test(host) && /\/(search|groups\/search)/.test(path)) return undefined;
+  if (/(^|\.)meetup\.com$/.test(host) && path.startsWith("/find")) return undefined;
+  if (/(^|\.)reddit\.com$/.test(host) && path.startsWith("/search")) return undefined;
+  if (/(^|\.)linkedin\.com$/.test(host) && path.includes("/search")) return undefined;
+  if (/(^|\.)disboard\.org$/.test(host) && path.startsWith("/servers/tag")) return undefined;
+  return u.toString();
 }
 
 export function toItem(raw: unknown, category: LiveSearchCategory): LiveResultItem | null {
@@ -134,7 +152,7 @@ export function toItem(raw: unknown, category: LiveSearchCategory): LiveResultIt
   const r = raw as Record<string, unknown>;
   if (!isNonEmptyString(r.name) || !isNonEmptyString(r.description)) return null;
   const tags = asStringArray(r.tags);
-  const externalUrl = isNonEmptyString(r.externalUrl) ? r.externalUrl : undefined;
+  const externalUrl = realDestinationUrl(r.externalUrl);
 
   switch (category) {
     case "community":
@@ -147,7 +165,7 @@ export function toItem(raw: unknown, category: LiveSearchCategory): LiveResultIt
         isOnline: r.isOnline !== false,
         type: isNonEmptyString(r.type) ? r.type : "social",
         tags,
-        externalUrl: externalUrl ?? fallbackSearchUrl(r.name, "community"),
+        externalUrl,
       };
     case "food":
     case "places":
@@ -162,7 +180,7 @@ export function toItem(raw: unknown, category: LiveSearchCategory): LiveResultIt
         state: isNonEmptyString(r.state) ? r.state : "",
         rating: typeof r.rating === "number" && r.rating > 0 && r.rating <= 5 ? r.rating : undefined,
         tags,
-        externalUrl: externalUrl ?? fallbackSearchUrl(r.name, `${r.city}`),
+        externalUrl,
       };
     case "events":
       if (!isNonEmptyString(r.venue)) return null;
@@ -177,8 +195,11 @@ export function toItem(raw: unknown, category: LiveSearchCategory): LiveResultIt
         category: isNonEmptyString(r.category) ? r.category : "community",
         organizer: isNonEmptyString(r.organizer) ? r.organizer : undefined,
         price: isNonEmptyString(r.price) ? r.price : undefined,
+        address: isNonEmptyString(r.address) ? r.address : undefined,
+        performers: asStringArray(r.performers, 10),
+        ticketInfo: isNonEmptyString(r.ticketInfo) ? r.ticketInfo : undefined,
         tags,
-        externalUrl: externalUrl ?? fallbackSearchUrl(r.name, r.venue),
+        externalUrl,
       };
     case "recipe":
       return {
@@ -189,7 +210,7 @@ export function toItem(raw: unknown, category: LiveSearchCategory): LiveResultIt
         difficulty: r.difficulty === "easy" || r.difficulty === "medium" || r.difficulty === "hard" ? r.difficulty : undefined,
         timeMinutes: typeof r.timeMinutes === "number" && r.timeMinutes > 0 ? r.timeMinutes : undefined,
         tags,
-        externalUrl: externalUrl ?? fallbackSearchUrl(r.name, "recipe"),
+        externalUrl,
         ingredients: asStringArray(r.ingredients, 25),
         steps: asStringArray(r.steps, 20),
       };
@@ -201,7 +222,7 @@ export function toItem(raw: unknown, category: LiveSearchCategory): LiveResultIt
         organizationType: isNonEmptyString(r.organizationType) ? r.organizationType : "Organization",
         locationLabel: isNonEmptyString(r.locationLabel) ? r.locationLabel : "Online",
         tags,
-        externalUrl: externalUrl ?? fallbackSearchUrl(r.name, "mentorship program"),
+        externalUrl,
       };
   }
 }

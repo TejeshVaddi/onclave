@@ -6,6 +6,7 @@ import { fetchLiveResults } from "@/services/liveSearch";
 import type { LiveResultItem, LiveSearchCategory, LiveSource } from "@/services/gemini/types";
 import { Badge, Tag } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
+import { LiveEventFacts } from "@/components/culture/LiveEventFacts";
 import { formatMinutes } from "@/lib/format";
 
 /** Don't burn API quota on every keystroke or an empty box. */
@@ -126,6 +127,7 @@ export function LiveResultsSection({ category, query, heritages, city, state }: 
               </div>
               <p className="mt-1 text-xs text-brown-muted">{subtitleFor(item)}</p>
               <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-brown-muted">{item.description}</p>
+              {item.kind === "event" ? <LiveEventFacts item={item} /> : null}
               {item.tags.length ? (
                 <div className="mt-2 flex flex-wrap gap-1">
                   {item.tags.slice(0, 3).map((t) => (

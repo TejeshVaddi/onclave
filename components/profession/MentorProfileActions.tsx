@@ -16,7 +16,7 @@ export function MentorProfileActions({ mentor }: { mentor: Mentor }) {
 
   function handleSend(mentorId: string, message: string) {
     requestConnection(mentorId, message);
-    toast({ title: "Connection request sent", description: `${mentor.name} will see your message.`, pillar: "profession" });
+    toast({ title: "Request saved", description: `Saved to your profile. ${mentor.name} is an example profile, so nothing was sent.`, pillar: "profession" });
     setOpen(false);
   }
 
@@ -24,7 +24,7 @@ export function MentorProfileActions({ mentor }: { mentor: Mentor }) {
     <div className="mt-6 flex gap-3">
       {requested ? (
         <Button variant="secondary" disabled icon={<CheckCircle2 className="h-4 w-4 text-green" aria-hidden />}>
-          Request sent
+          Request saved
         </Button>
       ) : (
         <Button variant="profession" onClick={() => setOpen(true)}>

@@ -38,7 +38,7 @@ export function DiscoveryResults({ result }: { result: DiscoveryResult }) {
 
   function handleSend(mentorId: string, message: string) {
     requestConnection(mentorId, message);
-    toast({ title: "Connection request sent", pillar: "profession" });
+    toast({ title: "Request saved", description: "Mentors here are example profiles, so nothing was sent.", pillar: "profession" });
     setActiveMentor(null);
   }
 

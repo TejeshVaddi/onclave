@@ -4,11 +4,12 @@ import { ExternalLink } from "lucide-react";
 import type { ReactNode } from "react";
 import { Button, type ButtonSize, type ButtonVariant } from "@/components/ui/Button";
 import { ResolveLinkButton } from "@/components/ui/ResolveLinkButton";
-import { placeMapUrl } from "@/services/placeService";
 import type { Place } from "@/types";
 
 interface Props {
   place: Place;
+  /** A real, known website for the place, when we have one. */
+  website?: string;
   variant?: ButtonVariant;
   size?: ButtonSize;
   className?: string;
@@ -17,16 +18,16 @@ interface Props {
 
 /**
  * A real, known URL — link straight there. Otherwise (the local dataset's
- * restaurants, shops, temples, etc. don't carry verified websites), try an
- * AI lookup for the place's actual website first; a Google Maps link (still
- * a real, useful destination, not a search page) is the fallback only if
- * that comes up empty.
+ * restaurants, shops, temples, etc. don't carry verified websites), look up
+ * the place's actual website on click, or say none was found. Directions are
+ * a separate, always-available button, so this never falls back to a search.
  */
-export function PlaceLinkButton({ place: p, variant = "culture", size, className, icon = <ExternalLink className="h-3.5 w-3.5" aria-hidden /> }: Props) {
-  if (p.externalUrl) {
+export function PlaceLinkButton({ place: p, website, variant = "culture", size, className, icon = <ExternalLink className="h-4 w-4" aria-hidden /> }: Props) {
+  const url = website ?? p.externalUrl;
+  if (url) {
     return (
-      <Button variant={variant} size={size} className={className} href={p.externalUrl} external iconRight={icon}>
-        View Location
+      <Button variant={variant} size={size} className={className} href={url} external iconRight={icon}>
+        Website
       </Button>
     );
   }
@@ -38,9 +39,8 @@ export function PlaceLinkButton({ place: p, variant = "culture", size, className
       heritages={p.heritages}
       city={p.city}
       state={p.state}
-      fallbackUrl={placeMapUrl(p)}
-      label="View Location"
-      loadingLabel="Finding the real link…"
+      label="Find website"
+      loadingLabel="Finding the website…"
       variant={variant}
       size={size}
       className={className}

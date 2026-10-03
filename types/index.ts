@@ -119,8 +119,20 @@ export interface Community {
   tags: string[];
   /** Approximate size, for display only. */
   memberEstimate?: string;
-  /** Link to the community on its home platform. Onclave never hosts communities. */
-  externalUrl: string;
+  /** Link to the community on its home platform. Onclave never hosts communities. Absent for demo listings with no verified page. */
+  externalUrl?: string;
+}
+
+/** Everything the "Learn more" panel shows beyond the card, keyed by community id in data/communityDetails. */
+export interface CommunityDetail {
+  /** Who the group is for. */
+  whoFor: string;
+  /** How often it meets or how active it is. */
+  cadence: string;
+  /** What members actually do together. */
+  activities: string[];
+  /** Concrete steps to join. */
+  howToJoin: string[];
 }
 
 /* ------------------------------------------------------------------ */
@@ -153,6 +165,14 @@ export interface Recipe {
   /** Short, original outline of the method (not a full recipe). */
   stepsPreview: string[];
   occasion?: string;
+}
+
+/** The complete recipe shown on a recipe's page, keyed by recipe id in data/recipeDetails. */
+export interface RecipeDetail {
+  /** Full ingredient lines with quantities, scaled to the recipe's `servings`. */
+  ingredients: string[];
+  /** The complete method, one action per step. */
+  steps: string[];
 }
 
 export type ArtTone =
@@ -210,6 +230,20 @@ export interface Place {
   imageUrl?: string;
 }
 
+/** Everything the "Learn more" panel shows beyond the card, keyed by place id in data/placeDetails. */
+export interface PlaceDetail {
+  /** Typical opening hours, in plain words. */
+  hours: string;
+  /** What to order, see, or do there, most notable first. */
+  knownFor: string[];
+  /** Who or what it suits, e.g. "Families", "Late night". */
+  goodFor: string[];
+  /** Practical notes: parking, cash only, best time to go. */
+  visitTips: string[];
+  /** The place's own website, only when it is real and known. */
+  website?: string;
+}
+
 export type EventCategory =
   | "festival"
   | "religious"
@@ -238,6 +272,28 @@ export interface CulturalEvent {
   price: string;
   externalUrl?: string;
   art: ArtTone;
+}
+
+/** Everything the "Learn more" panel shows beyond the card, keyed by event id in data/eventDetails. */
+export interface EventDetail {
+  /** Street address of the venue, when known. */
+  address?: string;
+  /** Performers, speakers, hosts, or vendors, most prominent first. */
+  lineup: { name: string; role: string }[];
+  /** A rough run of show. */
+  schedule: { time: string; item: string }[];
+  /** A sentence or two on who is putting the event on. */
+  organizerNote?: string;
+  tickets: {
+    /** How people get in, in plain words. */
+    how: string;
+    /** Where tickets are sold or the RSVP lives, when one is needed. */
+    where?: string;
+  };
+  /** Practical notes: parking, ages, what to bring, accessibility. */
+  goodToKnow: string[];
+  /** The venue's own website, when we know the real one. */
+  venueUrl?: string;
 }
 
 /* ------------------------------------------------------------------ */

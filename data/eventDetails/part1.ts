@@ -1,0 +1,542 @@
+import type { EventDetail } from "@/types";
+
+/**
+ * Illustrative details for the demo events (lineups, schedules, ticketing).
+ * The events themselves are demo listings, so these are examples of what a
+ * real listing would show, not announcements from the organizers named.
+ * Venue addresses and venue websites are only included when they are real
+ * and known.
+ */
+export const EVENT_DETAILS_1: Record<string, EventDetail> = {
+  "e-afrobeats-jollof-social": {
+    address: "475 Long Bridge Dr, Arlington, VA 22202",
+    lineup: [
+      { name: "DJ Kofi Bassline", role: "Afrobeats DJ, main set" },
+      { name: "Team Naija Jollof", role: "Cook-off team" },
+      { name: "Team Accra Jollof", role: "Cook-off team" },
+      { name: "Small Chops Corner", role: "Food vendor" },
+    ],
+    schedule: [
+      { time: "4:00 PM", item: "Gates open, DJ warm-up" },
+      { time: "5:00 PM", item: "Jollof cook-off judging begins" },
+      { time: "6:30 PM", item: "Winner announced, public tasting" },
+      { time: "7:00 PM", item: "Dance floor and main DJ set" },
+    ],
+    organizerNote: "A volunteer-run networking group for Nigerian professionals in the DC area that hosts a few social events each year.",
+    tickets: { how: "Free to attend, no ticket needed. Tasting plates are sold by the vendors.", where: "Pay vendors on site (card and cash)." },
+    goodToKnow: ["Bring a blanket or low chairs", "Family friendly", "Nearest Metro is Crystal City, about a 15-minute walk", "Rain date is the following Saturday"],
+  },
+  "e-nigerian-independence-2026": {
+    address: "1455 Pennsylvania Ave NW, Washington, DC 20004",
+    lineup: [
+      { name: "Egbe Omo Oodua Dancers", role: "Cultural parade and attire showcase" },
+      { name: "The Lagos Highlife Ensemble", role: "Live highlife band" },
+      { name: "DJ Temi", role: "Afrobeats set" },
+      { name: "Regional food stalls", role: "Yoruba, Igbo, Hausa, and Niger Delta dishes" },
+    ],
+    schedule: [
+      { time: "12:00 PM", item: "Opening ceremony and anthem" },
+      { time: "1:00 PM", item: "Cultural parade around the plaza" },
+      { time: "3:00 PM", item: "Traditional attire showcase" },
+      { time: "5:00 PM", item: "Live highlife" },
+      { time: "6:30 PM", item: "Afrobeats finale" },
+    ],
+    organizerNote: "An umbrella council of Nigerian associations across DC, Maryland, and Virginia that organizes the community's yearly independence celebration.",
+    tickets: { how: "Free and open to the public. No registration.", where: "Food and merchandise are paid on site." },
+    goodToKnow: ["Street closures nearby, so take the Metro to Metro Center", "Wear traditional attire if you like", "Strollers welcome"],
+  },
+  "e-naija-tech-mixer": {
+    address: "7750 Capital One Tower Rd, Tysons, VA 22102",
+    lineup: [
+      { name: "Panel of four Nigerian-American engineers", role: "Internships, interviews, switching into tech" },
+      { name: "A university career advisor", role: "Moderator" },
+    ],
+    schedule: [
+      { time: "6:30 PM", item: "Doors and check-in" },
+      { time: "7:00 PM", item: "Panel discussion" },
+      { time: "7:40 PM", item: "Audience questions" },
+      { time: "8:00 PM", item: "Open networking" },
+    ],
+    organizerNote: "A volunteer professional network that runs career panels and mentor mixers for Nigerian students and early-career professionals.",
+    tickets: { how: "Free, but RSVP is required because space is limited.", where: "RSVP through the organizer's sign-up form." },
+    goodToKnow: ["Students especially welcome", "Bring a resume if you want feedback", "Parking garage next to the venue", "Business casual"],
+    venueUrl: "https://www.capitalonehall.com",
+  },
+  "e-yoruba-language-circle": {
+    lineup: [
+      { name: "A native Yoruba speaker", role: "Instructor" },
+      { name: "Small group of up to 8 learners", role: "Heritage learners and curious beginners" },
+    ],
+    schedule: [
+      { time: "Week 1", item: "Greetings and introductions" },
+      { time: "Week 2", item: "Family words and songs" },
+      { time: "Weeks 3 to 4", item: "Everyday phrases, numbers, and food vocabulary" },
+      { time: "Weeks 5 to 6", item: "Short conversations and a closing song" },
+    ],
+    organizerNote: "An online community that connects heritage learners with native speakers for small-group Yoruba lessons.",
+    tickets: { how: "$40 covers all six weekly sessions. Pay when you reserve a seat.", where: "Reserve through the organizer's server." },
+    goodToKnow: ["No prior Yoruba needed", "Sessions are not recorded, so plan to attend live", "Wednesdays, 7:00 PM Eastern, about 75 minutes"],
+  },
+  "e-igbo-cultural-day": {
+    address: "4415 Daisy Reid Ave, Annandale, VA 22003",
+    lineup: [
+      { name: "Igbo masquerade troupe", role: "Masquerade display" },
+      { name: "Kids' spelling bee", role: "Igbo language contest for ages 6 to 14" },
+      { name: "Community elder speaker", role: "Talk on Igbo naming traditions" },
+      { name: "New yam tasting table", role: "Food" },
+    ],
+    schedule: [
+      { time: "1:00 PM", item: "Welcome and libation" },
+      { time: "2:00 PM", item: "Masquerade display" },
+      { time: "3:30 PM", item: "Igbo spelling bee" },
+      { time: "4:30 PM", item: "Talk on naming traditions" },
+      { time: "5:30 PM", item: "New yam tasting and dinner" },
+    ],
+    organizerNote: "A cultural association for Igbo families in Northern Virginia, running language classes and festivals for kids.",
+    tickets: { how: "$10 per adult, children under 13 free.", where: "Buy at the door or pay the organizer ahead of time." },
+    goodToKnow: ["Kids' spelling bee signs up in advance", "Wear traditional attire if you have it", "Free parking on site"],
+  },
+  "e-enkutatash-2026": {
+    address: "1 Veterans Pl, Silver Spring, MD 20910",
+    lineup: [
+      { name: "Habesha dance troupe", role: "Eskista performances" },
+      { name: "Church choir", role: "Mezmur hymns" },
+      { name: "Coffee ceremony hosts", role: "Traditional coffee ceremony" },
+      { name: "Food vendors", role: "Doro wat and injera plates" },
+    ],
+    schedule: [
+      { time: "5:00 PM", item: "Adey abeba flower greetings" },
+      { time: "6:00 PM", item: "Coffee ceremony" },
+      { time: "7:00 PM", item: "Mezmur and eskista performances" },
+      { time: "8:30 PM", item: "Dinner and dancing" },
+    ],
+    organizerNote: "A community center serving Ethiopian families in Maryland with language, senior, and youth programs.",
+    tickets: { how: "Free entry. Food plates are sold by vendors.", where: "Pay vendors on site." },
+    goodToKnow: ["Wear white if you like, as is customary", "Family friendly", "Metro: Silver Spring station is a short walk"],
+  },
+  "e-meskel-2026": {
+    lineup: [
+      { name: "Parish priests and deacons", role: "Hymns and blessing of the demera" },
+      { name: "Youth fellowship", role: "Procession and singing" },
+    ],
+    schedule: [
+      { time: "5:30 PM", item: "Gathering and hymns" },
+      { time: "6:15 PM", item: "Procession with candles" },
+      { time: "6:45 PM", item: "Lighting of the demera bonfire" },
+      { time: "7:30 PM", item: "Shared meal" },
+    ],
+    organizerNote: "The youth fellowship of an Ethiopian Orthodox Tewahedo church in Washington, DC.",
+    tickets: { how: "Free. No ticket or RSVP needed.", where: "Donations to the shared meal are welcome." },
+    goodToKnow: ["A religious observance, so dress modestly", "Visitors are welcome to watch", "Bring a candle if you can"],
+  },
+  "e-coffee-ceremony-workshop": {
+    lineup: [
+      { name: "Owner's family", role: "Hosts and ceremony leaders" },
+      { name: "Group of up to 12", role: "Hands-on participants" },
+    ],
+    schedule: [
+      { time: "2:00 PM", item: "Introduction and green bean roasting" },
+      { time: "2:40 PM", item: "Grinding and brewing in a jebena" },
+      { time: "3:15 PM", item: "Three rounds: abol, tona, baraka" },
+      { time: "3:45 PM", item: "Questions and snacks" },
+    ],
+    organizerNote: "A family-run Ethiopian restaurant in Silver Spring that hosts occasional cultural food workshops.",
+    tickets: { how: "$25 per person includes beans to take home and snacks.", where: "Reserve at the restaurant or by phone." },
+    goodToKnow: ["Space is limited to 12", "Vegetarian snacks available", "Caffeine free options on request"],
+  },
+  "e-fiestas-patrias-2026": {
+    address: "9201 Center St, Manassas, VA 20110",
+    lineup: [
+      { name: "Mariachi Aguila Real", role: "Mariachi stage" },
+      { name: "Banda Sol de Jalisco", role: "Banda stage" },
+      { name: "Ballet Folklórico youth troupe", role: "Folklórico dancers" },
+      { name: "Lucha libre exhibition", role: "Wrestling show" },
+    ],
+    schedule: [
+      { time: "11:00 AM", item: "Food stalls and kids' activities open" },
+      { time: "2:00 PM", item: "Folklórico performances" },
+      { time: "5:00 PM", item: "Mariachi stage" },
+      { time: "7:30 PM", item: "El Grito at sunset" },
+      { time: "8:00 PM", item: "Banda finale" },
+    ],
+    organizerNote: "A volunteer group for Mexican families in Virginia that organizes civic and cultural events.",
+    tickets: { how: "Free entry. Food and games use cash or card at each stall.", where: "Pay at stalls." },
+    goodToKnow: ["Bring chairs or a blanket", "Parking lots fill by early afternoon", "Family friendly"],
+  },
+  "e-folklorico-fall-show": {
+    lineup: [
+      { name: "Community folklórico troupe", role: "Dancers, ages 8 to adult" },
+      { name: "Live guitarrón and vihuela trio", role: "Accompaniment" },
+    ],
+    schedule: [
+      { time: "7:00 PM", item: "Doors and welcome" },
+      { time: "7:15 PM", item: "Jalisco suite" },
+      { time: "7:45 PM", item: "Veracruz suite" },
+      { time: "8:15 PM", item: "Oaxaca suite and Día de Muertos preview" },
+    ],
+    organizerNote: "A community folklórico group in Northern Virginia, teaching regional Mexican dance to kids and adults.",
+    tickets: { how: "$15 per person, kids under 6 free.", where: "Buy at the door or from the troupe." },
+    goodToKnow: ["Photos welcome without flash", "About 90 minutes with no intermission", "Seating is first come"],
+  },
+  "e-hispanic-heritage-food-walk": {
+    lineup: [
+      { name: "Mexican, Salvadoran, Colombian, and Peruvian restaurants", role: "Tasting stops along the route" },
+      { name: "Local partnership volunteers", role: "Passport check and route help" },
+    ],
+    schedule: [
+      { time: "12:00 PM", item: "Pick up passport at the start table" },
+      { time: "12:30 PM", item: "Tastings begin" },
+      { time: "3:30 PM", item: "Last tasting served" },
+      { time: "4:00 PM", item: "Walk closes" },
+    ],
+    organizerNote: "A local business and community partnership that promotes the shops and restaurants along a busy Arlington corridor.",
+    tickets: { how: "$20 passport includes one tasting at each stop.", where: "Buy at the start table the day of the walk." },
+    goodToKnow: ["Walk is about 1.5 miles", "Vegetarian options at most stops", "Wear comfortable shoes"],
+  },
+  "e-mid-autumn-lantern-night": {
+    address: "12000 Government Center Pkwy, Fairfax, VA 22035",
+    lineup: [
+      { name: "Northern Virginia lion dance team", role: "Lion dance" },
+      { name: "Children's lantern parade", role: "Parade" },
+      { name: "Storytelling corner", role: "Stories about the moon" },
+      { name: "Mooncake tasting table", role: "Chinese, Vietnamese, and Korean sweets" },
+    ],
+    schedule: [
+      { time: "6:00 PM", item: "Lantern craft table opens" },
+      { time: "7:00 PM", item: "Lantern parade" },
+      { time: "7:30 PM", item: "Lion dance" },
+      { time: "8:00 PM", item: "Storytelling and moon viewing" },
+    ],
+    organizerNote: "A community center serving Chinese families in Northern Virginia with language classes and festivals.",
+    tickets: { how: "Free. No ticket needed.", where: "Lantern craft kits are free while supplies last." },
+    goodToKnow: ["Bring a flashlight or LED candle", "Family friendly", "Free parking in the garage"],
+  },
+  "e-tet-trung-thu-eden": {
+    address: "6751 Wilson Blvd, Falls Church, VA 22044",
+    lineup: [
+      { name: "Lion dance troupe", role: "Lion dance" },
+      { name: "Áo dài kids' parade", role: "Children's parade" },
+      { name: "Eden bakeries", role: "Mooncakes" },
+    ],
+    schedule: [
+      { time: "3:00 PM", item: "Lantern-making tables open" },
+      { time: "5:00 PM", item: "Áo dài kids' parade" },
+      { time: "6:00 PM", item: "Lion dance" },
+      { time: "7:00 PM", item: "Lantern walk" },
+    ],
+    organizerNote: "A group of Vietnamese-American families and merchants who organize the festival at the shopping center.",
+    tickets: { how: "Free entry. Mooncakes and food are sold by shops.", where: "Pay at the shops." },
+    goodToKnow: ["Gets crowded by 6 PM", "Free parking in the lot, but it fills early", "Family friendly"],
+    venueUrl: "https://www.edencenter.com",
+  },
+  "e-pho-cooking-class": {
+    lineup: [
+      { name: "Restaurant chef", role: "Instructor" },
+      { name: "Group of up to 10", role: "Hands-on cooks" },
+    ],
+    schedule: [
+      { time: "11:00 AM", item: "Charring ginger and onion, toasting spices" },
+      { time: "11:40 AM", item: "Simmering and skimming the broth" },
+      { time: "12:30 PM", item: "Slicing beef and assembling bowls" },
+      { time: "1:00 PM", item: "Lunch together" },
+    ],
+    organizerNote: "A Northern-style phở restaurant in Falls Church that occasionally opens its kitchen for classes.",
+    tickets: { how: "$45 per person, lunch included.", where: "Reserve at the restaurant." },
+    goodToKnow: ["Space is limited to 10", "Vegetarian broth on request", "Aprons provided"],
+  },
+  "e-garba-night-2026": {
+    address: "4320 Chantilly Shopping Center, Chantilly, VA 20151",
+    lineup: [
+      { name: "Gujarati live band", role: "Garba and dandiya music" },
+      { name: "Step instructors", role: "Beginner tutorial at 7:30" },
+      { name: "Chaat counter", role: "Food vendor" },
+    ],
+    schedule: [
+      { time: "7:30 PM", item: "Beginner garba tutorial" },
+      { time: "8:15 PM", item: "Garba begins" },
+      { time: "10:00 PM", item: "Dandiya raas" },
+      { time: "12:00 AM", item: "Final aarti and last song" },
+    ],
+    organizerNote: "A group of Indian families in Northern Virginia that runs cultural nights and festivals.",
+    tickets: { how: "$20 in advance, more at the door.", where: "Buy from the organizer's ticket link before the day." },
+    goodToKnow: ["Traditional dress encouraged", "Bring your own dandiya sticks or buy them at the door", "Leave shoes outside the dance floor"],
+  },
+  "e-diwali-mela-2026": {
+    address: "12000 Government Center Pkwy, Fairfax, VA 22035",
+    lineup: [
+      { name: "Student dance teams", role: "Bollywood and classical stages" },
+      { name: "Rangoli competition", role: "Community art contest" },
+      { name: "Bazaar vendors", role: "Sweets, clothing, crafts" },
+      { name: "Fireworks", role: "Finale at 8:30 PM" },
+    ],
+    schedule: [
+      { time: "12:00 PM", item: "Bazaar opens and diya lighting" },
+      { time: "2:00 PM", item: "Classical dance stage" },
+      { time: "4:00 PM", item: "Rangoli judging" },
+      { time: "6:00 PM", item: "Bollywood stage" },
+      { time: "8:30 PM", item: "Fireworks finale" },
+    ],
+    organizerNote: "A student organization at a Northern Virginia university that hosts the area's biggest campus Diwali event.",
+    tickets: { how: "Free and open to all.", where: "Vendors take cash and card." },
+    goodToKnow: ["Free parking in the garage", "Wear festive clothes", "Family friendly"],
+  },
+  "e-south-asian-premed-panel": {
+    lineup: [
+      { name: "Three physicians and two residents", role: "Panelists of Indian, Pakistani, and Bangladeshi heritage" },
+      { name: "A pre-med advisor", role: "Moderator" },
+    ],
+    schedule: [
+      { time: "7:00 PM", item: "Welcome" },
+      { time: "7:10 PM", item: "Panel: applications, gap years, family expectations" },
+      { time: "8:00 PM", item: "Live Q&A" },
+    ],
+    organizerNote: "A volunteer network of South Asian professionals in the DC area that runs career events.",
+    tickets: { how: "Free. RSVP required so you get the video link.", where: "RSVP through the organizer's form." },
+    goodToKnow: ["Open to high school and college students", "Camera optional", "Slides shared by email afterward"],
+  },
+  "e-urdu-mushaira-oct": {
+    address: "814 Ferndale Ave, Herndon, VA 20170",
+    lineup: [
+      { name: "Four local poets", role: "Ghazal and nazm recitations" },
+      { name: "Two visiting poets", role: "Featured readers" },
+      { name: "Translator", role: "English translations projected on screen" },
+    ],
+    schedule: [
+      { time: "6:00 PM", item: "Doors and chai" },
+      { time: "6:30 PM", item: "First half of readings" },
+      { time: "7:30 PM", item: "Intermission with samosas" },
+      { time: "8:00 PM", item: "Second half and open mic" },
+    ],
+    organizerNote: "A local circle of Urdu poetry lovers who meet monthly and host a larger mushaira each autumn.",
+    tickets: { how: "$10 suggested donation, no one turned away.", where: "Donation box at the door." },
+    goodToKnow: ["No Urdu needed, translations provided", "Open mic spots go on a sign-up sheet", "Seating is limited"],
+  },
+  "e-noche-colombiana": {
+    address: "3701 Mount Vernon Ave, Alexandria, VA 22305",
+    lineup: [
+      { name: "Vallenato conjunto from Barranquilla", role: "Headline band" },
+      { name: "DJ Costeño", role: "Cumbia dance floor" },
+      { name: "Arepa stand", role: "Food" },
+    ],
+    schedule: [
+      { time: "8:00 PM", item: "Doors, arepa stand opens" },
+      { time: "9:00 PM", item: "Live vallenato set" },
+      { time: "10:30 PM", item: "Cumbia dance floor" },
+      { time: "11:30 PM", item: "Scholarship raffle" },
+    ],
+    organizerNote: "A group of Colombian families and professionals in the DMV that raises money for student scholarships.",
+    tickets: { how: "$30 per person. Advance tickets recommended.", where: "Through the venue's box office or at the door if not sold out." },
+    goodToKnow: ["Ages 18 and up after 10 PM", "Dance floor is standing", "Raffle benefits scholarships"],
+    venueUrl: "https://www.birchmere.com",
+  },
+  "e-empanada-fest": {
+    lineup: [
+      { name: "Colombian, Argentine, and Salvadoran empanada makers", role: "Competition entrants" },
+      { name: "Kids' arepa-making table", role: "Activity" },
+      { name: "Live salsa band", role: "Music" },
+    ],
+    schedule: [
+      { time: "12:00 PM", item: "Stalls open, tastings begin" },
+      { time: "2:00 PM", item: "Kids' arepa-making" },
+      { time: "3:30 PM", item: "Voting closes" },
+      { time: "4:30 PM", item: "Neighborhood title announced" },
+    ],
+    organizerNote: "A cultural center for Colombian families in the DMV, running festivals, classes, and a library.",
+    tickets: { how: "Free entry. Tastings are $2 each.", where: "Buy tasting tickets at the entrance." },
+    goodToKnow: ["Bring cash for tastings", "Vegetarian empanadas available", "Parking in the lot and on nearby streets"],
+  },
+  "e-dumpling-social": {
+    lineup: [
+      { name: "Center elders", role: "Folding instructors" },
+      { name: "Families and heritage learners", role: "Participants" },
+    ],
+    schedule: [
+      { time: "3:00 PM", item: "Welcome and hand washing" },
+      { time: "3:15 PM", item: "Three folds: crescent, pleated, and pouch" },
+      { time: "4:30 PM", item: "Boiling and pan-frying" },
+      { time: "5:00 PM", item: "Eat together" },
+    ],
+    organizerNote: "A community center in Northern Virginia with weekend language, music, and cooking programs.",
+    tickets: { how: "$12 per person, materials included.", where: "Pay at the front desk or register in advance." },
+    goodToKnow: ["Vegetarian filling available", "Great for ages 7 and up", "Aprons provided"],
+  },
+  "e-chuseok-family-day": {
+    lineup: [
+      { name: "Samulnori percussion group", role: "Live performance" },
+      { name: "Songpyeon making stations", role: "Rice-cake making" },
+      { name: "Traditional games table", role: "Yut nori and jegichagi" },
+    ],
+    schedule: [
+      { time: "11:00 AM", item: "Games and hanbok photo booth open" },
+      { time: "12:00 PM", item: "Songpyeon making" },
+      { time: "2:00 PM", item: "Samulnori performance" },
+      { time: "3:00 PM", item: "Tea and rice-cake tasting" },
+    ],
+    organizerNote: "A community center serving Korean families in the DC area with classes, senior programs, and cultural events.",
+    tickets: { how: "Free. No ticket or RSVP needed.", where: "Songpyeon kits are free while they last." },
+    goodToKnow: ["Hanbok try-ons are free", "Free parking on site", "Family friendly"],
+  },
+  "e-fahm-kickoff": {
+    lineup: [
+      { name: "Tinikling dancers", role: "Cultural performance" },
+      { name: "A nurse leader", role: "Talk on Filipino nurses in American healthcare" },
+      { name: "Youth artists", role: "Art show" },
+      { name: "Kamayan feast", role: "Community meal" },
+    ],
+    schedule: [
+      { time: "2:00 PM", item: "Doors and youth art show opens" },
+      { time: "3:00 PM", item: "Tinikling performances" },
+      { time: "4:00 PM", item: "Talk on nursing history" },
+      { time: "5:00 PM", item: "Kamayan feast" },
+    ],
+    organizerNote: "A young professionals group for Filipino Americans in the DC area.",
+    tickets: { how: "Free to attend.", where: "A small donation to the feast is appreciated." },
+    goodToKnow: ["Feast is eaten by hand on banana leaves", "Vegetarian dishes available", "Family friendly"],
+  },
+  "e-diaspora-founders-roundtable": {
+    lineup: [
+      { name: "Five founders from Nigerian, Indian, Ethiopian, and Colombian families", role: "Roundtable speakers" },
+      { name: "Community investor", role: "Moderator" },
+    ],
+    schedule: [
+      { time: "6:00 PM", item: "Check-in and mingling" },
+      { time: "6:30 PM", item: "Roundtable discussion" },
+      { time: "7:15 PM", item: "Audience Q&A" },
+      { time: "7:30 PM", item: "Networking" },
+    ],
+    organizerNote: "Two professional networks, one for Latino and one for Nigerian technologists, co-hosting an event for founders of every background.",
+    tickets: { how: "$10 per person covers snacks and drinks.", where: "Register through the organizers' event page." },
+    goodToKnow: ["Early stage founders especially welcome", "Business casual", "Metro: Farragut stations"],
+  },
+  "e-immigrant-legal-clinic": {
+    lineup: [
+      { name: "Volunteer immigration attorneys", role: "20-minute consultations" },
+      { name: "Interpreters", role: "Urdu, Spanish, Amharic, and Yoruba" },
+    ],
+    schedule: [
+      { time: "10:00 AM", item: "Check-in begins" },
+      { time: "10:15 AM", item: "First consultations" },
+      { time: "1:30 PM", item: "Last sign-ups" },
+    ],
+    organizerNote: "A mosque and community center that opens its space each season for free services run by volunteers.",
+    tickets: { how: "Free. First come, first served.", where: "Sign in at the front table when you arrive." },
+    goodToKnow: ["Bring any letters or documents about your case", "Consultations are confidential", "All faiths and backgrounds welcome"],
+  },
+  "e-turkish-festival-dc": {
+    lineup: [
+      { name: "Whirling dervish ensemble", role: "Sema performance" },
+      { name: "Turkish folk dance troupe", role: "Halay and zeybek dances" },
+      { name: "Kebap and baklava vendors", role: "Food" },
+      { name: "Carpet and ceramics marketplace", role: "Shopping" },
+    ],
+    schedule: [
+      { time: "10:00 AM", item: "Marketplace and food open" },
+      { time: "12:00 PM", item: "Folk dance performances" },
+      { time: "2:00 PM", item: "Sema ceremony" },
+      { time: "4:00 PM", item: "Live music" },
+    ],
+    organizerNote: "A cultural association that organizes Turkish community events in the Washington area.",
+    tickets: { how: "Free and open to the public.", where: "Food and shopping are paid on site." },
+    goodToKnow: ["Take the Metro to Archives or Smithsonian", "No outside alcohol", "Family friendly"],
+  },
+  "e-nowruz-celebration": {
+    lineup: [
+      { name: "Santoor soloist", role: "Live music" },
+      { name: "School students", role: "Poetry and song" },
+      { name: "Haft-sin display", role: "Cultural exhibit" },
+    ],
+    schedule: [
+      { time: "2:00 PM", item: "Haft-sin display opens" },
+      { time: "3:00 PM", item: "Santoor performance" },
+      { time: "4:30 PM", item: "Student poetry and songs" },
+      { time: "6:00 PM", item: "Potluck dinner" },
+    ],
+    organizerNote: "A weekend school and cultural center for Iranian families in the DC area.",
+    tickets: { how: "Free. Bring a dish to share if you can.", where: "No sign-up needed." },
+    goodToKnow: ["Held off the traditional spring date for the demo calendar", "Vegetarian dishes welcome", "Street parking nearby"],
+  },
+  "e-jamaican-independence-gala": {
+    address: "8656 Colesville Rd, Silver Spring, MD 20910",
+    lineup: [
+      { name: "Reggae band", role: "Live headliner" },
+      { name: "Dancehall DJ", role: "Late night set" },
+      { name: "Jerk chicken competition teams", role: "Cook-off" },
+      { name: "Island fashion show", role: "Runway" },
+    ],
+    schedule: [
+      { time: "7:00 PM", item: "Doors, jerk competition tasting" },
+      { time: "8:30 PM", item: "Fashion show" },
+      { time: "9:30 PM", item: "Reggae band" },
+      { time: "11:00 PM", item: "Dancehall DJ" },
+    ],
+    organizerNote: "A nationals association for Jamaicans living in the DC area that organizes independence events each year.",
+    tickets: { how: "$25 per person.", where: "Through the venue's box office or the association." },
+    goodToKnow: ["Ages 16 and up", "Dress to celebrate in black, green, and gold", "Metro: Silver Spring station"],
+    venueUrl: "https://www.fillmoresilverspring.com",
+  },
+  "e-pohela-boishakh": {
+    address: "814 Ferndale Ave, Herndon, VA 20170",
+    lineup: [
+      { name: "Rabindra Sangeet singers", role: "Live music" },
+      { name: "Children's alpana contest", role: "Art" },
+      { name: "Mishti and snack stalls", role: "Food" },
+    ],
+    schedule: [
+      { time: "11:00 AM", item: "Mela opens, alpana drawing" },
+      { time: "1:00 PM", item: "Rabindra Sangeet" },
+      { time: "3:00 PM", item: "Alpana contest judging" },
+      { time: "5:00 PM", item: "Closing songs" },
+    ],
+    organizerNote: "A community association for Bangladeshi families in the Washington area that organizes the Bengali new year mela.",
+    tickets: { how: "Free entry. Food tickets are sold at the stalls.", where: "Buy at the stalls." },
+    goodToKnow: ["Wear red and white if you like", "Family friendly", "Free parking at the center"],
+  },
+  "e-lebanese-food-festival": {
+    lineup: [
+      { name: "Parish kitchen volunteers", role: "Kibbeh, manakish, and sweets" },
+      { name: "Dabke troupe", role: "Folk dance performances" },
+      { name: "Wine garden", role: "Lebanese wines" },
+    ],
+    schedule: [
+      { time: "12:00 PM", item: "Food booths open" },
+      { time: "2:00 PM", item: "Dabke performance" },
+      { time: "4:00 PM", item: "Raffle" },
+      { time: "6:00 PM", item: "Last call for food" },
+    ],
+    organizerNote: "A Maronite parish that hosts a food festival each fall to support its church programs.",
+    tickets: { how: "$5 entry, kids under 12 free.", where: "Pay at the gate. Food is paid by the plate." },
+    goodToKnow: ["Wine garden is for ages 21 and up", "Vegetarian plates available", "Shuttle from the overflow lot"],
+  },
+  "e-peru-independence-parade": {
+    lineup: [
+      { name: "Marinera dancers", role: "Parade performers" },
+      { name: "Marching bands", role: "Music" },
+      { name: "Food fair", role: "Ceviche, anticuchos, and picarones" },
+    ],
+    schedule: [
+      { time: "1:00 PM", item: "Parade starts" },
+      { time: "3:00 PM", item: "Food fair opens" },
+      { time: "4:00 PM", item: "Marinera dance showcase" },
+    ],
+    organizerNote: "A cultural association for Peruvian Americans in the DC area that organizes the yearly parade.",
+    tickets: { how: "Free to watch.", where: "Food is paid at the booths." },
+    goodToKnow: ["Roads close at noon, so take the Metro", "Bring water", "Family friendly"],
+  },
+  "e-el-salvador-day": {
+    address: "7700 Bull Run Dr, Centreville, VA 20121",
+    lineup: [
+      { name: "Cumbia and salsa band", role: "Live music" },
+      { name: "Pupusa-making demonstrations", role: "Cooking" },
+      { name: "Folk dance showcase", role: "Dance" },
+    ],
+    schedule: [
+      { time: "3:00 PM", item: "Food stalls open" },
+      { time: "4:00 PM", item: "Pupusa demonstrations" },
+      { time: "5:30 PM", item: "Folk dance showcase" },
+      { time: "7:00 PM", item: "Live cumbia and salsa" },
+    ],
+    organizerNote: "A volunteer cultural group that connects Salvadoran families in Northern Virginia with events for kids and adults.",
+    tickets: { how: "Free entry.", where: "Food and activities are paid at each stall." },
+    goodToKnow: ["Bring chairs", "Family friendly", "Pupusa demonstrations are hands-on for kids"],
+  },
+};

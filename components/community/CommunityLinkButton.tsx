@@ -5,7 +5,6 @@ import type { ReactNode } from "react";
 import { Button, type ButtonSize, type ButtonVariant } from "@/components/ui/Button";
 import { ResolveLinkButton } from "@/components/ui/ResolveLinkButton";
 import type { Community } from "@/types";
-import type { CommunityRecord } from "@/data/communities";
 
 interface Props {
   community: Community;
@@ -16,16 +15,18 @@ interface Props {
 }
 
 /**
- * A "direct" community record already carries a real URL — link straight
- * there. A "search" record (most of the demo dataset, since we don't track
- * live community URLs) used to always send people to a platform search
- * page; now it tries an AI lookup for the actual group/page first, and
- * only falls back to that search page if nothing real can be found.
+ * A community with a real URL links straight there. One without (most of
+ * the demo dataset, since we don't track live community URLs) tries an AI
+ * lookup for the actual group/page on click, and says so if nothing real can
+ * be found. It never sends anyone to a platform's search page.
  */
-export function CommunityLinkButton({ community: c, variant = "community", size, className, icon = <ExternalLink className="h-3.5 w-3.5" aria-hidden /> }: Props) {
-  const isSearchLink = (c as CommunityRecord).linkKind === "search";
+/** True when the community carries a real, specific URL. */
+export function hasDirectLink(c: Community): boolean {
+  return Boolean(c.externalUrl);
+}
 
-  if (!isSearchLink) {
+export function CommunityLinkButton({ community: c, variant = "community", size, className, icon = <ExternalLink className="h-3.5 w-3.5" aria-hidden /> }: Props) {
+  if (c.externalUrl) {
     return (
       <Button variant={variant} size={size} className={className} href={c.externalUrl} external iconRight={icon}>
         Visit Community
@@ -39,9 +40,8 @@ export function CommunityLinkButton({ community: c, variant = "community", size,
       query={c.name}
       heritages={c.heritages}
       city={c.isOnline ? "" : c.locationLabel}
-      fallbackUrl={c.externalUrl}
-      label="Visit Community"
-      loadingLabel="Finding the real link…"
+      label="Find the community"
+      loadingLabel="Finding the community…"
       variant={variant}
       size={size}
       className={className}

@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 import { Button } from "@/components/ui/Button";
 import { ResolveLinkButton } from "@/components/ui/ResolveLinkButton";
-import { eventLinkLabel, eventLinkUrl } from "@/services/eventService";
+import { eventLinkLabel } from "@/services/eventService";
 import type { CulturalEvent } from "@/types";
 import type { ButtonSize, ButtonVariant } from "@/components/ui/Button";
 
@@ -15,7 +15,7 @@ interface Props {
   icon?: ReactNode;
 }
 
-/** A real, known URL — link straight there. Otherwise, resolve the real website/ticket page on click. */
+/** A real, known URL — link straight there. Otherwise, resolve the real website/ticket page on click, or say none was found. */
 export function EventLinkButton({ event: e, variant = "culture", size, className, icon }: Props) {
   if (e.externalUrl) {
     return (
@@ -32,7 +32,6 @@ export function EventLinkButton({ event: e, variant = "culture", size, className
       heritages={e.heritages}
       city={e.city}
       state={e.state}
-      fallbackUrl={eventLinkUrl(e)}
       label={eventLinkLabel(e)}
       loadingLabel="Finding the real link…"
       variant={variant}

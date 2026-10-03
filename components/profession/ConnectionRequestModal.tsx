@@ -35,14 +35,14 @@ export function ConnectionRequestModal({
       open={open}
       onClose={onClose}
       title="Request a connection"
-      description="Onclave sends a short introduction. Mentors respond in their own time, on their own platform."
+      description="Mentors here are example profiles, so this request is saved to your profile and not delivered to a real person."
       footer={
         <>
           <Button variant="ghost" onClick={onClose}>
             Cancel
           </Button>
           <Button variant="profession" onClick={handleSend}>
-            Send request
+            Save request
           </Button>
         </>
       }

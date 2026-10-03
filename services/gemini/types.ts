@@ -60,6 +60,12 @@ export interface LiveEventItem extends LiveItemBase {
   category: string;
   organizer?: string;
   price?: string;
+  /** Street address of the venue, when the source states it. */
+  address?: string;
+  /** Named performers, speakers, or hosts the source lists. */
+  performers?: string[];
+  /** Where and how to buy tickets or RSVP, in the source's terms. */
+  ticketInfo?: string;
 }
 
 export interface LiveRecipeItem extends LiveItemBase {

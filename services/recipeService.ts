@@ -44,8 +44,3 @@ export async function getRecipe(id: string): Promise<Recipe | undefined> {
   const all = await dataSource.getRecipes();
   return all.find((r) => r.id === id);
 }
-
-/** Web search fallback for the "find the full recipe" action while sourceUrl is null. */
-export function recipeSearchUrl(recipe: Recipe): string {
-  return `https://www.google.com/search?q=${encodeURIComponent(`${recipe.name} recipe`)}`;
-}

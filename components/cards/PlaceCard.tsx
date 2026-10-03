@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import { Church, Landmark, MapPin, ShoppingBasket, Star, Store, UtensilsCrossed, Coffee, Croissant, Building2 } from "lucide-react";
 import type { Place, RecommendationReason } from "@/types";
@@ -7,7 +8,8 @@ import { Card } from "@/components/ui/Card";
 import { Badge, Tag } from "@/components/ui/Badge";
 import { CoverArt } from "@/components/ui/CoverArt";
 import { MatchReasons } from "@/components/ui/MatchReasons";
-import { PlaceLinkButton } from "@/components/culture/PlaceLinkButton";
+import { Button } from "@/components/ui/Button";
+import { PlaceDetailModal } from "@/components/culture/PlaceDetailModal";
 import { placeCategoryLabel } from "@/services/placeService";
 import { formatDistance } from "@/lib/geo";
 import { cn } from "@/lib/utils";
@@ -36,6 +38,7 @@ interface Props {
 
 export function PlaceCard({ place: p, distanceMiles, reasons, score }: Props) {
   const Icon = ICONS[p.category] ?? MapPin;
+  const [open, setOpen] = useState(false);
   const coverClasses = "h-28 sm:h-auto sm:w-32 xl:h-32 xl:w-full";
   return (
     <Card as="article" pillar="culture" interactive padded={false} className="flex flex-col sm:flex-row sm:items-stretch xl:flex-col">
@@ -77,8 +80,11 @@ export function PlaceCard({ place: p, distanceMiles, reasons, score }: Props) {
         </div>
         {reasons?.length ? <MatchReasons reasons={reasons} score={score} className="mt-3" /> : null}
         <div className="mt-4 pt-1">
-          <PlaceLinkButton place={p} size="sm" />
+          <Button variant="culture" size="sm" onClick={() => setOpen(true)}>
+            Learn More
+          </Button>
         </div>
+        <PlaceDetailModal place={p} open={open} onClose={() => setOpen(false)} />
       </div>
     </Card>
   );

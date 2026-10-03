@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/Button";
 import { CoverArt } from "@/components/ui/CoverArt";
 import { DemoNote } from "@/components/ui/DemoNote";
 import { IngredientsNearYou } from "@/components/culture/IngredientsNearYou";
-import { FindFullRecipeButton } from "@/components/culture/FindFullRecipeButton";
+import { getRecipeDetail } from "@/data/recipeDetails";
 
 export function generateStaticParams() {
   return RECIPES.map((r) => ({ id: r.id }));
@@ -29,6 +29,11 @@ export default async function RecipeDetailPage({ params }: PageProps<"/culture/r
   const { id } = await params;
   const recipe = await getRecipe(id);
   if (!recipe) notFound();
+
+  // Full recipe when we have one; the short preview is only a safety net.
+  const detail = getRecipeDetail(recipe.id);
+  const ingredients = detail?.ingredients ?? recipe.ingredientsPreview;
+  const steps = detail?.steps ?? recipe.stepsPreview;
 
   return (
     <div className="mx-auto max-w-3xl animate-fade-up">
@@ -65,11 +70,12 @@ export default async function RecipeDetailPage({ params }: PageProps<"/culture/r
             </div>
           ) : null}
 
-          <div className="mt-6 grid gap-6 sm:grid-cols-2">
-            <div>
-              <h2 className="text-sm font-bold uppercase tracking-wide text-brown-faint">What goes in it</h2>
-              <ul className="mt-2 space-y-1.5 text-sm text-brown">
-                {recipe.ingredientsPreview.map((ing) => (
+          <div className="mt-6 grid gap-8 sm:grid-cols-5">
+            <div className="sm:col-span-2">
+              <h2 className="text-sm font-bold uppercase tracking-wide text-brown-faint">Ingredients</h2>
+              <p className="mt-1 text-xs text-brown-faint">For {recipe.servings} servings</p>
+              <ul className="mt-3 space-y-2 text-sm text-brown">
+                {ingredients.map((ing) => (
                   <li key={ing} className="flex gap-2">
                     <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-berry" aria-hidden />
                     {ing}
@@ -77,12 +83,12 @@ export default async function RecipeDetailPage({ params }: PageProps<"/culture/r
                 ))}
               </ul>
             </div>
-            <div>
-              <h2 className="text-sm font-bold uppercase tracking-wide text-brown-faint">How it comes together</h2>
-              <ol className="mt-2 space-y-2 text-sm text-brown">
-                {recipe.stepsPreview.map((step, i) => (
+            <div className="sm:col-span-3">
+              <h2 className="text-sm font-bold uppercase tracking-wide text-brown-faint">Instructions</h2>
+              <ol className="mt-3 space-y-3 text-sm leading-relaxed text-brown">
+                {steps.map((step, i) => (
                   <li key={step} className="flex gap-2.5">
-                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-berry-soft text-[11px] font-bold text-berry-deep">{i + 1}</span>
+                    <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-berry-soft text-[11px] font-bold text-berry-deep">{i + 1}</span>
                     {step}
                   </li>
                 ))}
@@ -95,14 +101,13 @@ export default async function RecipeDetailPage({ params }: PageProps<"/culture/r
           <p className="mt-6 text-xs text-brown-faint">Source: {recipe.sourceName}</p>
 
           <div className="mt-5 flex flex-wrap gap-3">
-            <FindFullRecipeButton recipe={recipe} />
             <Button variant="outline" href="/culture?tab=recipes">
               Browse more recipes
             </Button>
           </div>
 
           <DemoNote className="mt-6">
-            This is an original short summary written for the Onclave demo, not a copied recipe. &quot;Find the full recipe&quot; asks Gemini (or Groq, as backup) for a real, current recipe for this dish and opens it directly — falling back to a Google search only if AI lookup is unavailable.
+            Recipes are original write-ups for the Onclave demo, scaled to the serving count shown. Adjust seasoning to taste, and always cook meat, poultry, and fish to a safe internal temperature.
           </DemoNote>
         </div>
       </div>

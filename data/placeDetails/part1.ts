@@ -1,0 +1,247 @@
+import type { PlaceDetail } from "@/types";
+
+/**
+ * Hours, highlights, and tips for the demo places. Most listings are demo
+ * data, so hours and highlights are typical examples, not live information.
+ * A `website` is only included when it is the real, known site.
+ */
+export const PLACE_DETAILS_1: Record<string, PlaceDetail> = {
+  "p-mama-ngozi": {
+    hours: "Tue to Sun 11 AM to 10 PM, closed Monday",
+    knownFor: ["Party jollof rice", "Egusi soup with pounded yam", "Friday suya nights"],
+    goodFor: ["Families", "Group dinners", "Takeout trays"],
+    visitTips: ["Order the suya early on Fridays, it sells out", "Large parties should call ahead", "Free parking in the shopping center"],
+  },
+  "p-lagos-grill": {
+    hours: "Daily 4 PM to 2 AM, DJ sets Fri and Sat",
+    knownFor: ["Late-night suya", "Peppered goat", "Small chops platters"],
+    goodFor: ["Nightlife", "Music", "Groups of friends"],
+    visitTips: ["Weekend cover may apply after 10 PM", "Ages 21 and up after 9 PM", "Street parking can be tight on weekends"],
+  },
+  "p-african-market-centreville": {
+    hours: "Daily 9 AM to 9 PM",
+    knownFor: ["Egusi, ogbono, and palm oil", "Yam flour and garri", "Frozen fish and meat pies"],
+    goodFor: ["Stocking the pantry", "First-time cooks of West African food"],
+    visitTips: ["Ask staff for substitutions if an ingredient is out", "Bring your own bags", "Frozen items are in the back"],
+  },
+  "p-abuja-bakery": {
+    hours: "Mon to Sat 7 AM to 7 PM, Sun 9 AM to 5 PM",
+    knownFor: ["Meat pies", "Puff-puff and chin chin", "Agege bread"],
+    goodFor: ["Breakfast", "Party catering", "Quick snacks"],
+    visitTips: ["Order catering trays at least 3 days ahead", "Bread is freshest before noon", "Cash and card accepted"],
+  },
+  "p-saffron-house": {
+    hours: "Daily 11:30 AM to 10 PM",
+    knownFor: ["Weekend thali", "Paneer tikka masala", "Dal makhani"],
+    goodFor: ["Vegetarians", "Family dinners", "Date night"],
+    visitTips: ["Spice levels are adjustable, just ask", "Reservations help on weekends", "Gluten-free options marked on the menu"],
+  },
+  "p-dosa-corner": {
+    hours: "Daily 7 AM to 9 PM",
+    knownFor: ["Crisp dosas", "Idli with sambar", "Filter coffee"],
+    goodFor: ["Breakfast", "Quick lunch", "Vegetarians"],
+    visitTips: ["Counter service, order at the register", "Weekend mornings get busy", "Most dishes are vegan or can be made vegan"],
+  },
+  "p-bombay-bazaar": {
+    hours: "Daily 9 AM to 9 PM",
+    knownFor: ["Spices by weight", "Frozen parathas", "Sweets counter and chaat stall"],
+    goodFor: ["Pantry stocking", "Festival shopping", "Picking up sweets"],
+    visitTips: ["The chaat stall opens at noon", "Weekday mornings are quietest", "Ask for Diwali sweet boxes in October"],
+  },
+  "p-karachi-kabab": {
+    hours: "Daily 11 AM to 11 PM",
+    knownFor: ["Charcoal seekh and chapli kebabs", "Weekend nihari", "Karak chai"],
+    goodFor: ["Halal dining", "Group dinners", "Late dinner"],
+    visitTips: ["Nihari is served Saturday and Sunday only", "Fully halal kitchen", "Takeout is quick"],
+  },
+  "p-lahore-sweets": {
+    hours: "Daily 10 AM to 10 PM",
+    knownFor: ["Mithai counter", "Samosas and chai", "Eid sweet boxes"],
+    goodFor: ["Gifts", "Iftar platters", "Tea breaks"],
+    visitTips: ["Order Eid boxes a week early", "Fresh jalebi at the counter after 4 PM", "Halal"],
+  },
+  "p-la-casa-del-pozole": {
+    hours: "Daily 10 AM to 10 PM",
+    knownFor: ["Pozole rojo and verde", "Birria tacos", "Handmade tortillas"],
+    goodFor: ["Families", "Live music nights", "Takeout"],
+    visitTips: ["Mariachi on the first Friday of each month", "Pozole is served by the bowl or quart", "Free lot parking"],
+  },
+  "p-mercado-latino": {
+    hours: "Daily 8 AM to 10 PM",
+    knownFor: ["Tortillería and carnicería", "Panadería", "Chiles, masa, and Colombian staples"],
+    goodFor: ["Weekly shopping", "Fresh tortillas", "Hard-to-find ingredients"],
+    visitTips: ["Tortillas are freshest in the morning", "Butcher counter will cut to order", "Cash and card accepted"],
+  },
+  "p-panaderia-luna": {
+    hours: "Daily 6 AM to 8 PM",
+    knownFor: ["Conchas and orejas", "Tres leches cake", "Pan de muerto in the fall"],
+    goodFor: ["Breakfast", "Birthday cakes", "Holiday breads"],
+    visitTips: ["Order roscas for Día de Reyes by early January", "Pick up a tray and tongs at the door", "Best selection before 10 AM"],
+  },
+  "p-arepa-y-cafe": {
+    hours: "Daily 7 AM to 8 PM",
+    knownFor: ["Arepas de choclo", "Calentado breakfast", "Buñuelos and tinto"],
+    goodFor: ["Breakfast", "Coffee", "Friday empanada happy hour"],
+    visitTips: ["Breakfast is served all day", "Friday happy hour starts at 4 PM", "Parking on Duke St is metered"],
+  },
+  "p-sabor-paisa": {
+    hours: "Tue to Sun 11 AM to 10 PM",
+    knownFor: ["Bandeja paisa", "Sunday ajiaco", "Monthly live vallenato"],
+    goodFor: ["Families", "Big tables", "Music nights"],
+    visitTips: ["Bandeja paisa is large, share it", "Ajiaco is Sundays only", "Reservations help for groups of 8 or more"],
+  },
+  "p-addis-house": {
+    hours: "Daily 11 AM to 11 PM",
+    knownFor: ["Doro wat", "Kitfo", "Veggie combo on house-made injera"],
+    goodFor: ["Vegetarians", "Sharing plates", "Sunday coffee ceremony"],
+    visitTips: ["Eat with your hands using injera", "Coffee ceremony on Sundays", "Fasting-day menu on Wednesdays and Fridays"],
+  },
+  "p-habesha-market": {
+    hours: "Daily 8 AM to 9 PM",
+    knownFor: ["Fresh injera", "Teff flour", "Berbere, mitmita, and niter kibbeh"],
+    goodFor: ["Home cooks", "Gifts of spices", "Roasting your own coffee"],
+    visitTips: ["Injera is baked fresh each morning", "Ask for green coffee beans by the pound", "Cash and card accepted"],
+  },
+  "p-little-ethiopia-cafe": {
+    hours: "Daily 8 AM to 8 PM",
+    knownFor: ["Macchiato", "Sambusa", "Fasting-friendly lunches"],
+    goodFor: ["Coffee", "Vegans", "A quiet work spot"],
+    visitTips: ["Wi-Fi available", "Vegan lunch specials on fasting days", "Near U Street Metro"],
+  },
+  "p-pho-bac-eden": {
+    hours: "Daily 9 AM to 9 PM",
+    knownFor: ["Northern-style phở", "Bún chả", "Bánh cuốn"],
+    goodFor: ["Quick lunch", "Cold days", "Casual dinner"],
+    visitTips: ["Located inside Eden Center", "Ask for extra herbs", "Free parking in the center lot"],
+  },
+  "p-eden-bakery": {
+    hours: "Daily 7 AM to 7 PM",
+    knownFor: ["Bánh mì", "Pâté chaud", "Mooncakes in season"],
+    goodFor: ["Breakfast on the go", "Gifts of pastries"],
+    visitTips: ["Cash only", "Lines are long on weekends", "Mooncakes sell out before Mid-Autumn Festival"],
+  },
+  "p-saigon-market": {
+    hours: "Daily 8 AM to 8 PM",
+    knownFor: ["Fresh herbs", "Live seafood", "Rice paper and fish sauce"],
+    goodFor: ["Cooking phở at home", "Fresh produce"],
+    visitTips: ["Ask for the herb bundles for phở", "Weekend mornings are busiest", "Bring bags"],
+  },
+  "p-golden-wok": {
+    hours: "Daily 11 AM to 10 PM",
+    knownFor: ["Mapo tofu", "Dan dan noodles", "Dry-fried green beans"],
+    goodFor: ["Spice lovers", "Group dinners"],
+    visitTips: ["Ask for mild if you are not used to Sichuan heat", "Peppercorns numb the tongue, which is normal", "Vegetarian dishes available"],
+  },
+  "p-great-wall-market": {
+    hours: "Daily 8 AM to 9 PM",
+    knownFor: ["Fresh noodles and dumpling wrappers", "Live fish", "Hot food counter"],
+    goodFor: ["Pan-Asian groceries", "Weekly shopping"],
+    visitTips: ["Hot food counter is on the left side", "Weekends are crowded", "Plenty of parking"],
+  },
+  "p-dim-sum-garden": {
+    hours: "Mon to Fri 11 AM to 9 PM, Sat and Sun 9 AM to 9 PM",
+    knownFor: ["Weekend cart-service dim sum", "Har gow and siu mai", "Egg tarts"],
+    goodFor: ["Families", "Weekend brunch", "Large groups"],
+    visitTips: ["Carts run until 3 PM on weekends", "Reserve for parties of 6 or more", "Round tables seat up to 10"],
+  },
+  "p-kusina-filipina": {
+    hours: "Daily 10 AM to 8 PM",
+    knownFor: ["Adobo", "Sinigang and kare-kare", "Halo-halo in summer"],
+    goodFor: ["Comfort food", "Families", "Quick lunch"],
+    visitTips: ["Point and choose from the steam table", "Rice comes with each plate", "Halo-halo is seasonal"],
+  },
+  "p-han-ah-reum-annandale": {
+    hours: "Daily 11 AM to 2 AM",
+    knownFor: ["Kimchi jjigae", "Galbi", "Late-night soondubu"],
+    goodFor: ["Late night", "Cold days", "Group dinners"],
+    visitTips: ["Open late on weekends", "Banchan refills are free", "Street parking behind the building"],
+  },
+  "cp-durga-mandir": {
+    hours: "Daily 6 AM to 8 PM, aarti at 7 AM and 7 PM",
+    knownFor: ["Daily aarti", "Weekend Bal Vihar classes", "Diwali and Navratri gatherings"],
+    goodFor: ["Worship", "Families", "Festival visits"],
+    visitTips: ["Remove shoes at the entrance", "Dress modestly", "Parking can overflow during major festivals"],
+  },
+  "cp-masjid-annoor": {
+    hours: "Open for the five daily prayers, Jumu'ah at 1 PM",
+    knownFor: ["Jumu'ah prayer", "Weekend Islamic school", "Youth basketball league and interfaith iftars"],
+    goodFor: ["Worship", "Youth programs", "Community events"],
+    visitTips: ["Dress modestly", "Women's prayer area available", "Visitors are welcome, call ahead for tours"],
+  },
+  "cp-rccg-fairfax": {
+    hours: "Sunday services at 9 AM and 11 AM, midweek study Wed 7 PM",
+    knownFor: ["Lively choir", "Youth service", "Monthly community meal"],
+    goodFor: ["Worship", "Youth", "Meeting Nigerian families"],
+    visitTips: ["Services run about two hours", "Nursery available", "Visitors are welcome"],
+  },
+  "cp-ethiopian-orthodox-dc": {
+    hours: "Sunday liturgy from 6 AM, Sunday school after the service",
+    knownFor: ["Ge'ez and Amharic liturgy", "Timket processions", "Sunday school"],
+    goodFor: ["Worship", "Holiday visits", "Families"],
+    visitTips: ["Wear white and remove shoes inside", "Women often cover their heads", "Services are long, standing is common"],
+  },
+  "cp-ccc-nova": {
+    hours: "Weekend school Sat and Sun 9 AM to 4 PM, office Mon to Fri 10 AM to 5 PM",
+    knownFor: ["Weekend Chinese school", "Guzheng and lion dance troupes", "Lunar New Year gala"],
+    goodFor: ["Language learning", "Kids' programs", "Festivals"],
+    visitTips: ["Register for classes before each term starts", "Free parking", "Lunar New Year gala tickets sell out"],
+  },
+  "cp-ethiopian-community-center": {
+    hours: "Mon to Fri 9 AM to 5 PM, events on weekends",
+    knownFor: ["Amharic classes for kids", "Senior day program", "Immigration help desk"],
+    goodFor: ["Families", "Newcomers", "Holiday celebrations"],
+    visitTips: ["Call for the immigration help desk schedule", "Programs run in Amharic and English", "Metro: Silver Spring is nearby"],
+  },
+  "cp-latino-cultural-center": {
+    hours: "Mon to Sat 10 AM to 9 PM",
+    knownFor: ["Folklórico and salsa classes", "Spanish-language theater", "Día de Muertos altars and youth murals"],
+    goodFor: ["Dance classes", "Arts", "Youth"],
+    visitTips: ["Drop-in classes are $10", "Theater shows are bilingual on request", "Street parking on Columbia Pike"],
+  },
+  "cp-vietnamese-buddhist-temple": {
+    hours: "Daily 8 AM to 6 PM, Sunday dharma talk at 10 AM",
+    knownFor: ["Sunday dharma talks", "Vietnamese language classes", "Tết and Vu Lan ceremonies"],
+    goodFor: ["Worship", "Quiet visits", "Festivals"],
+    visitTips: ["Dress modestly", "Shoes come off in the main hall", "Visitors welcome, please be quiet during chanting"],
+  },
+  "cp-eden-center": {
+    hours: "Most shops open daily 9 AM to 9 PM",
+    knownFor: ["Over 100 shops and restaurants", "Clock tower inspired by Saigon's Bến Thành Market", "Tết festivals"],
+    goodFor: ["Food crawl", "Groceries", "Festivals"],
+    visitTips: ["Weekends are crowded, go before noon", "Many stalls are cash only", "Free parking in the center lot"],
+    website: "https://www.edencenter.com",
+  },
+  "cp-nmaa": {
+    hours: "Daily 10 AM to 5:30 PM, free admission",
+    knownFor: ["Collections from China, South Asia, and Southeast Asia", "Islamic art galleries", "Family days and film series"],
+    goodFor: ["Art lovers", "Families", "Rainy days"],
+    visitTips: ["Free, no ticket needed for general entry", "Closest Metro is Smithsonian", "Check the website for special exhibitions"],
+    website: "https://asia.si.edu",
+  },
+  "cp-nmafa": {
+    hours: "Daily 10 AM to 5:30 PM, free admission",
+    knownFor: ["Benin bronzes and Yoruba masks", "Contemporary African painting", "Rotating exhibitions"],
+    goodFor: ["Art lovers", "School groups", "Learning African art history"],
+    visitTips: ["Free, no ticket needed", "Closest Metro is Smithsonian", "Combine with the Asian Art Museum next door"],
+    website: "https://africa.si.edu",
+  },
+  "cp-nmaahc": {
+    hours: "Daily 10 AM to 5:30 PM, free admission",
+    knownFor: ["History galleries below ground", "African diaspora exhibits", "Sweet Home Café"],
+    goodFor: ["History lovers", "Families with older kids", "Half-day visit"],
+    visitTips: ["Free timed passes may be required, check the website first", "Plan three or more hours", "Closest Metro is Smithsonian or Federal Triangle"],
+    website: "https://nmaahc.si.edu",
+  },
+  "cp-mexican-cultural-institute": {
+    hours: "Tue to Sat 10 AM to 5 PM, evening events vary",
+    knownFor: ["Art exhibitions", "Film nights", "Día de Muertos ofrendas"],
+    goodFor: ["Art lovers", "Date night", "Family workshops"],
+    visitTips: ["Exhibitions are free", "Check the events calendar for evening programs", "Metro: Columbia Heights is nearby"],
+  },
+  "cp-little-ethiopia": {
+    hours: "Streets open all day, most businesses open until late",
+    knownFor: ["Ethiopian restaurants and markets", "Coffee shops", "Annual street festival"],
+    goodFor: ["Food walks", "Coffee", "Neighborhood history"],
+    visitTips: ["Go hungry and try two or three places", "Evenings are lively", "Metro: U Street station"],
+  },
+};

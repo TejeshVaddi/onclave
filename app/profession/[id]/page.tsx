@@ -5,6 +5,8 @@ import { ArrowLeft, Briefcase, Globe2, GraduationCap, MapPin } from "lucide-reac
 import { MENTORS } from "@/data/mentors";
 import { getMentor } from "@/services/mentorService";
 import { MentorProfileActions } from "@/components/profession/MentorProfileActions";
+import { RealOrganizations } from "@/components/profession/RealOrganizations";
+import { DemoNote } from "@/components/ui/DemoNote";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge, Tag } from "@/components/ui/Badge";
 import { availabilityLabel } from "@/services/mentorService";
@@ -53,6 +55,7 @@ export default async function MentorDetailPage({ params }: PageProps<"/professio
         <div className="mt-4 flex flex-wrap gap-1.5">
           <Badge tone="profession">{mentor.heritageLabel}</Badge>
           <Badge tone={mentor.availability === "open" ? "success" : "neutral"}>{availabilityLabel(mentor.availability)}</Badge>
+          <Badge tone="beige">Example profile</Badge>
         </div>
 
         <p className="mt-5 text-[15px] leading-relaxed text-brown">{mentor.bio}</p>
@@ -100,6 +103,12 @@ export default async function MentorDetailPage({ params }: PageProps<"/professio
         <p className="mt-6 rounded-2xl bg-terracotta-soft px-4 py-3 text-sm italic text-terracotta-deep">“{mentor.openTo}”</p>
 
         <MentorProfileActions mentor={mentor} />
+
+        <RealOrganizations profession={mentor.profession} heritages={mentor.heritages} firstName={mentor.name.replace(/^Dr\.\s+/, "").split(" ")[0]} />
+
+        <DemoNote className="mt-6">
+          This is an example profile written for the Onclave demo, not a real person. Connection requests are saved to your profile but not delivered to anyone. The organizations above are real places to meet actual mentors.
+        </DemoNote>
       </div>
     </div>
   );

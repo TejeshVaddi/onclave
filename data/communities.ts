@@ -3,13 +3,12 @@ import type { Community } from "@/types";
 /**
  * Mock community dataset.
  *
- * Onclave is a discovery layer: every entry links OUT to a public community on
- * its home platform. Entries with `linkKind: "search"` point to that platform's
- * public search for the community, because the demo dataset does not track
- * live URLs. Replace this file with an API-backed source in
- * services/dataSource.ts when ready.
+ * Onclave is a discovery layer: communities live on their home platforms.
+ * Entries with an `externalUrl` link straight to the real community. Entries
+ * without one are demo listings, so the app looks up the real page on click
+ * (see CommunityLinkButton) and never substitutes a search page. Replace this
+ * file with an API-backed source in services/dataSource.ts when ready.
  */
-export type CommunityRecord = Community & { linkKind: "direct" | "search" };
 
 const GEO = {
   fairfax: { lat: 38.8462, lng: -77.3064 },
@@ -29,14 +28,7 @@ const GEO = {
   collegePark: { lat: 38.9897, lng: -76.9378 },
 };
 
-const meetup = (q: string) =>
-  `https://www.meetup.com/find/?keywords=${encodeURIComponent(q)}&location=us--va--Fairfax&source=GROUPS`;
-const facebook = (q: string) =>
-  `https://www.facebook.com/groups/search/groups/?q=${encodeURIComponent(q)}`;
-const web = (q: string) => `https://www.google.com/search?q=${encodeURIComponent(q)}`;
-const discord = (tag: string) => `https://disboard.org/servers/tag/${tag}`;
-
-export const COMMUNITIES: CommunityRecord[] = [
+export const COMMUNITIES: Community[] = [
   /* ---------------- Nigerian ---------------- */
   {
     id: "c-nigeria-reddit",
@@ -51,7 +43,6 @@ export const COMMUNITIES: CommunityRecord[] = [
     tags: ["Nigerian", "Diaspora", "Discussion"],
     memberEstimate: "100k+ members",
     externalUrl: "https://www.reddit.com/r/Nigeria/",
-    linkKind: "direct",
   },
   {
     id: "c-nigerians-dmv",
@@ -66,8 +57,6 @@ export const COMMUNITIES: CommunityRecord[] = [
     type: "social",
     tags: ["Nigerian", "Community", "Local"],
     memberEstimate: "10k+ members",
-    externalUrl: facebook("Nigerians in the DMV"),
-    linkKind: "search",
   },
   {
     id: "c-nsa-gmu",
@@ -82,8 +71,6 @@ export const COMMUNITIES: CommunityRecord[] = [
     type: "student",
     tags: ["Nigerian", "Students", "Community"],
     memberEstimate: "200+ members",
-    externalUrl: web("Nigerian Student Association George Mason University"),
-    linkKind: "search",
   },
   {
     id: "c-naija-pros-dc",
@@ -98,8 +85,6 @@ export const COMMUNITIES: CommunityRecord[] = [
     type: "professional",
     tags: ["Nigerian", "Professionals", "Networking"],
     memberEstimate: "1.5k members",
-    externalUrl: meetup("Nigerian professionals"),
-    linkKind: "search",
   },
   {
     id: "c-igbo-nova",
@@ -113,8 +98,6 @@ export const COMMUNITIES: CommunityRecord[] = [
     heritages: ["nigerian"],
     type: "cultural",
     tags: ["Nigerian", "Igbo", "Culture", "Language"],
-    externalUrl: web("Igbo Cultural Association Northern Virginia"),
-    linkKind: "search",
   },
   {
     id: "c-yoruba-discord",
@@ -128,8 +111,6 @@ export const COMMUNITIES: CommunityRecord[] = [
     type: "cultural",
     tags: ["Nigerian", "Yoruba", "Language"],
     memberEstimate: "3k members",
-    externalUrl: discord("yoruba"),
-    linkKind: "search",
   },
   {
     id: "c-nigerian-fellowship",
@@ -143,8 +124,6 @@ export const COMMUNITIES: CommunityRecord[] = [
     heritages: ["nigerian"],
     type: "religious",
     tags: ["Nigerian", "Faith", "Families"],
-    externalUrl: web("Nigerian church Centreville Virginia"),
-    linkKind: "search",
   },
   {
     id: "c-west-african-neighbors",
@@ -158,8 +137,6 @@ export const COMMUNITIES: CommunityRecord[] = [
     heritages: ["nigerian", "ghanaian"],
     type: "local",
     tags: ["West African", "Neighbors", "Families"],
-    externalUrl: "https://nextdoor.com/",
-    linkKind: "search",
   },
 
   /* ---------------- Indian ---------------- */
@@ -176,7 +153,6 @@ export const COMMUNITIES: CommunityRecord[] = [
     tags: ["South Asian", "Diaspora", "Identity"],
     memberEstimate: "100k+ members",
     externalUrl: "https://www.reddit.com/r/ABCDesis/",
-    linkKind: "direct",
   },
   {
     id: "c-isa-gmu",
@@ -191,8 +167,6 @@ export const COMMUNITIES: CommunityRecord[] = [
     type: "student",
     tags: ["Indian", "Students", "Festivals"],
     memberEstimate: "500+ members",
-    externalUrl: web("Indian Student Association George Mason University"),
-    linkKind: "search",
   },
   {
     id: "c-nova-indian-families",
@@ -207,8 +181,6 @@ export const COMMUNITIES: CommunityRecord[] = [
     type: "social",
     tags: ["Indian", "Families", "Local"],
     memberEstimate: "25k members",
-    externalUrl: facebook("Indian families Northern Virginia"),
-    linkKind: "search",
   },
   {
     id: "c-desi-pros-dc",
@@ -223,8 +195,6 @@ export const COMMUNITIES: CommunityRecord[] = [
     type: "professional",
     tags: ["South Asian", "Professionals", "Networking"],
     memberEstimate: "4k members",
-    externalUrl: meetup("South Asian professionals"),
-    linkKind: "search",
   },
   {
     id: "c-temple-youth-fairfax",
@@ -238,8 +208,6 @@ export const COMMUNITIES: CommunityRecord[] = [
     heritages: ["indian"],
     type: "religious",
     tags: ["Indian", "Faith", "Youth"],
-    externalUrl: web("Sri Siva Vishnu Temple Bala Vihar"),
-    linkKind: "search",
   },
 
   /* ---------------- Mexican ---------------- */
@@ -256,7 +224,6 @@ export const COMMUNITIES: CommunityRecord[] = [
     tags: ["Mexican", "Discussion", "Spanish"],
     memberEstimate: "1M+ members",
     externalUrl: "https://www.reddit.com/r/mexico/",
-    linkKind: "direct",
   },
   {
     id: "c-chicano-reddit",
@@ -271,7 +238,6 @@ export const COMMUNITIES: CommunityRecord[] = [
     tags: ["Mexican-American", "Identity", "History"],
     memberEstimate: "30k members",
     externalUrl: "https://www.reddit.com/r/Chicano/",
-    linkKind: "direct",
   },
   {
     id: "c-mexicanos-virginia",
@@ -286,8 +252,6 @@ export const COMMUNITIES: CommunityRecord[] = [
     type: "social",
     tags: ["Mexican", "Community", "Spanish"],
     memberEstimate: "18k members",
-    externalUrl: facebook("Mexicanos en Virginia"),
-    linkKind: "search",
   },
   {
     id: "c-latino-student-alliance",
@@ -301,8 +265,6 @@ export const COMMUNITIES: CommunityRecord[] = [
     heritages: ["mexican", "colombian", "salvadoran", "peruvian"],
     type: "student",
     tags: ["Latino", "Students", "First-gen"],
-    externalUrl: web("Latino Student Alliance George Mason University"),
-    linkKind: "search",
   },
   {
     id: "c-folklorico-nova",
@@ -316,8 +278,6 @@ export const COMMUNITIES: CommunityRecord[] = [
     heritages: ["mexican"],
     type: "cultural",
     tags: ["Mexican", "Dance", "Culture"],
-    externalUrl: meetup("ballet folklorico"),
-    linkKind: "search",
   },
   {
     id: "c-latinos-in-tech-dc",
@@ -332,8 +292,6 @@ export const COMMUNITIES: CommunityRecord[] = [
     type: "professional",
     tags: ["Latino", "Tech", "Professionals"],
     memberEstimate: "6k members",
-    externalUrl: meetup("Latinos in tech"),
-    linkKind: "search",
   },
 
   /* ---------------- Ethiopian ---------------- */
@@ -350,7 +308,6 @@ export const COMMUNITIES: CommunityRecord[] = [
     tags: ["Ethiopian", "Diaspora", "Discussion"],
     memberEstimate: "50k members",
     externalUrl: "https://www.reddit.com/r/Ethiopia/",
-    linkKind: "direct",
   },
   {
     id: "c-habesha-yp-dc",
@@ -365,8 +322,6 @@ export const COMMUNITIES: CommunityRecord[] = [
     type: "professional",
     tags: ["Ethiopian", "Professionals", "Networking"],
     memberEstimate: "2k members",
-    externalUrl: meetup("Habesha professionals"),
-    linkKind: "search",
   },
   {
     id: "c-ethiopian-community-center",
@@ -380,8 +335,6 @@ export const COMMUNITIES: CommunityRecord[] = [
     heritages: ["ethiopian"],
     type: "local",
     tags: ["Ethiopian", "Nonprofit", "Language"],
-    externalUrl: web("Ethiopian community center Silver Spring"),
-    linkKind: "search",
   },
   {
     id: "c-tewahedo-youth",
@@ -395,8 +348,6 @@ export const COMMUNITIES: CommunityRecord[] = [
     heritages: ["ethiopian"],
     type: "religious",
     tags: ["Ethiopian", "Faith", "Youth"],
-    externalUrl: web("Ethiopian Orthodox youth fellowship Washington DC"),
-    linkKind: "search",
   },
   {
     id: "c-esa-umd",
@@ -410,8 +361,6 @@ export const COMMUNITIES: CommunityRecord[] = [
     heritages: ["ethiopian"],
     type: "student",
     tags: ["Ethiopian", "Students", "Mentorship"],
-    externalUrl: web("Ethiopian Student Association University of Maryland"),
-    linkKind: "search",
   },
 
   /* ---------------- Pakistani ---------------- */
@@ -428,7 +377,6 @@ export const COMMUNITIES: CommunityRecord[] = [
     tags: ["Pakistani", "Diaspora", "Discussion"],
     memberEstimate: "200k+ members",
     externalUrl: "https://www.reddit.com/r/pakistan/",
-    linkKind: "direct",
   },
   {
     id: "c-psa-gmu",
@@ -442,8 +390,6 @@ export const COMMUNITIES: CommunityRecord[] = [
     heritages: ["pakistani"],
     type: "student",
     tags: ["Pakistani", "Students", "Culture"],
-    externalUrl: web("Pakistani Student Association George Mason University"),
-    linkKind: "search",
   },
   {
     id: "c-pak-pros-dc",
@@ -458,8 +404,6 @@ export const COMMUNITIES: CommunityRecord[] = [
     type: "professional",
     tags: ["Pakistani", "Professionals", "Mentorship"],
     memberEstimate: "3k members",
-    externalUrl: meetup("Pakistani professionals"),
-    linkKind: "search",
   },
   {
     id: "c-urdu-mushaira",
@@ -473,8 +417,6 @@ export const COMMUNITIES: CommunityRecord[] = [
     heritages: ["pakistani", "indian"],
     type: "cultural",
     tags: ["Pakistani", "Urdu", "Poetry", "Arts"],
-    externalUrl: facebook("Urdu mushaira Northern Virginia"),
-    linkKind: "search",
   },
 
   /* ---------------- Vietnamese ---------------- */
@@ -491,7 +433,6 @@ export const COMMUNITIES: CommunityRecord[] = [
     tags: ["Vietnamese", "Diaspora", "Discussion"],
     memberEstimate: "200k+ members",
     externalUrl: "https://www.reddit.com/r/VietNam/",
-    linkKind: "direct",
   },
   {
     id: "c-eden-center-community",
@@ -506,8 +447,6 @@ export const COMMUNITIES: CommunityRecord[] = [
     type: "local",
     tags: ["Vietnamese", "Local", "Food"],
     memberEstimate: "12k members",
-    externalUrl: facebook("Eden Center Vietnamese community"),
-    linkKind: "search",
   },
   {
     id: "c-vsa-gmu",
@@ -521,8 +460,6 @@ export const COMMUNITIES: CommunityRecord[] = [
     heritages: ["vietnamese"],
     type: "student",
     tags: ["Vietnamese", "Students", "Mentorship"],
-    externalUrl: web("Vietnamese Student Association George Mason University"),
-    linkKind: "search",
   },
   {
     id: "c-viet-yp-dc",
@@ -537,8 +474,6 @@ export const COMMUNITIES: CommunityRecord[] = [
     type: "professional",
     tags: ["Vietnamese", "Professionals", "Networking"],
     memberEstimate: "2.5k members",
-    externalUrl: meetup("Vietnamese professionals"),
-    linkKind: "search",
   },
 
   /* ---------------- Chinese ---------------- */
@@ -555,7 +490,6 @@ export const COMMUNITIES: CommunityRecord[] = [
     tags: ["Asian American", "Identity", "Discussion"],
     memberEstimate: "200k+ members",
     externalUrl: "https://www.reddit.com/r/asianamerican/",
-    linkKind: "direct",
   },
   {
     id: "c-chinese-community-center-nova",
@@ -569,8 +503,6 @@ export const COMMUNITIES: CommunityRecord[] = [
     heritages: ["chinese"],
     type: "cultural",
     tags: ["Chinese", "Language", "Culture", "Families"],
-    externalUrl: web("Chinese community center Northern Virginia"),
-    linkKind: "search",
   },
   {
     id: "c-cssa-gmu",
@@ -584,8 +516,6 @@ export const COMMUNITIES: CommunityRecord[] = [
     heritages: ["chinese"],
     type: "student",
     tags: ["Chinese", "Students", "Community"],
-    externalUrl: web("Chinese Students and Scholars Association George Mason University"),
-    linkKind: "search",
   },
   {
     id: "c-mandarin-exchange-discord",
@@ -599,8 +529,6 @@ export const COMMUNITIES: CommunityRecord[] = [
     type: "cultural",
     tags: ["Chinese", "Language", "Mandarin"],
     memberEstimate: "20k members",
-    externalUrl: discord("chinese"),
-    linkKind: "search",
   },
 
   /* ---------------- Colombian ---------------- */
@@ -617,7 +545,6 @@ export const COMMUNITIES: CommunityRecord[] = [
     tags: ["Colombian", "Diaspora", "Spanish"],
     memberEstimate: "200k+ members",
     externalUrl: "https://www.reddit.com/r/Colombia/",
-    linkKind: "direct",
   },
   {
     id: "c-colombianos-dmv",
@@ -632,8 +559,6 @@ export const COMMUNITIES: CommunityRecord[] = [
     type: "social",
     tags: ["Colombian", "Community", "Spanish"],
     memberEstimate: "9k members",
-    externalUrl: facebook("Colombianos en DC Maryland Virginia"),
-    linkKind: "search",
   },
   {
     id: "c-colombian-pros-dc",
@@ -647,8 +572,6 @@ export const COMMUNITIES: CommunityRecord[] = [
     heritages: ["colombian"],
     type: "professional",
     tags: ["Colombian", "Professionals", "Mentorship"],
-    externalUrl: meetup("Colombian professionals"),
-    linkKind: "search",
   },
   {
     id: "c-salsa-cumbia-nova",
@@ -663,8 +586,6 @@ export const COMMUNITIES: CommunityRecord[] = [
     type: "cultural",
     tags: ["Colombian", "Dance", "Music"],
     memberEstimate: "1.2k members",
-    externalUrl: meetup("salsa cumbia social"),
-    linkKind: "search",
   },
 
   /* ---------------- Other / regional ---------------- */
@@ -681,8 +602,6 @@ export const COMMUNITIES: CommunityRecord[] = [
     type: "professional",
     tags: ["Filipino", "Professionals", "Networking"],
     memberEstimate: "2k members",
-    externalUrl: meetup("Filipino young professionals"),
-    linkKind: "search",
   },
   {
     id: "c-nova-reddit",
@@ -698,7 +617,6 @@ export const COMMUNITIES: CommunityRecord[] = [
     tags: ["Local", "Northern Virginia", "Events"],
     memberEstimate: "200k+ members",
     externalUrl: "https://www.reddit.com/r/nova/",
-    linkKind: "direct",
   },
 
   /* ---------------- Cross-heritage / newcomer networks ---------------- */
@@ -714,8 +632,6 @@ export const COMMUNITIES: CommunityRecord[] = [
     heritages: [],
     type: "religious",
     tags: ["Interfaith", "Newcomers", "Neighbors"],
-    externalUrl: "https://nextdoor.com/",
-    linkKind: "search",
   },
   {
     id: "c-multifaith-family-network",
@@ -729,8 +645,6 @@ export const COMMUNITIES: CommunityRecord[] = [
     heritages: [],
     type: "religious",
     tags: ["Interfaith", "Families", "Potlucks"],
-    externalUrl: "https://nextdoor.com/",
-    linkKind: "search",
   },
   {
     id: "c-new-to-nova",
@@ -744,8 +658,6 @@ export const COMMUNITIES: CommunityRecord[] = [
     heritages: [],
     type: "local",
     tags: ["Newcomers", "Neighbors", "Local"],
-    externalUrl: "https://nextdoor.com/",
-    linkKind: "search",
   },
   {
     id: "c-global-neighbors-tysons",
@@ -759,8 +671,6 @@ export const COMMUNITIES: CommunityRecord[] = [
     heritages: [],
     type: "social",
     tags: ["Social", "Neighbors", "Language Exchange"],
-    externalUrl: "https://nextdoor.com/",
-    linkKind: "search",
   },
   {
     id: "c-firstgen-discord",
@@ -774,8 +684,6 @@ export const COMMUNITIES: CommunityRecord[] = [
     type: "student",
     tags: ["First-Gen", "Students", "College"],
     memberEstimate: "4k members",
-    externalUrl: discord("first-gen"),
-    linkKind: "search",
   },
   {
     id: "c-immigrant-professionals-discord",
@@ -789,8 +697,6 @@ export const COMMUNITIES: CommunityRecord[] = [
     type: "professional",
     tags: ["Professional", "Networking", "Career"],
     memberEstimate: "6k members",
-    externalUrl: discord("immigrant-professionals"),
-    linkKind: "search",
   },
   {
     id: "c-world-culture-discord",
@@ -804,7 +710,5 @@ export const COMMUNITIES: CommunityRecord[] = [
     type: "cultural",
     tags: ["Culture", "Music", "Dance"],
     memberEstimate: "2.5k members",
-    externalUrl: discord("world-culture"),
-    linkKind: "search",
   },
 ];

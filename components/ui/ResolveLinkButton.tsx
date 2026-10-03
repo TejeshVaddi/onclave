@@ -12,8 +12,12 @@ interface Props {
   heritages?: string[];
   city?: string;
   state?: string;
-  /** Only used if AI lookup is unavailable or turns up nothing — never the default path. */
-  fallbackUrl: string;
+  /**
+   * Only for a specific, non-search destination (e.g. a map pin for an exact
+   * address). Never a search-results page: if there is nothing real to open,
+   * the button says so instead.
+   */
+  fallbackUrl?: string;
   label: string;
   loadingLabel?: string;
   variant?: ButtonVariant;
@@ -23,12 +27,11 @@ interface Props {
 }
 
 /**
- * Opens the REAL destination for something in the demo dataset that doesn't
- * carry a verified URL — a restaurant, temple, event, or community — instead
- * of a Google search results page. On click, asks the same Gemini/Groq
- * pipeline that powers Live Results to find the actual real page, and
- * navigates straight there. A search link only ever appears as the very
- * last resort, if AI lookup is unavailable or genuinely finds nothing.
+ * Opens the REAL destination for something that doesn't carry a verified
+ * URL of its own (a restaurant, temple, event, or community). On click, asks
+ * the same Gemini/Groq pipeline that powers Live Results for the actual
+ * page and navigates straight there. If nothing real turns up, it says so
+ * rather than dropping the person on a search results page.
  *
  * Opens a blank tab synchronously (before the async lookup) and redirects it
  * once resolved — the standard way to avoid popup blockers eating a tab
@@ -42,27 +45,51 @@ interface Props {
  */
 export function ResolveLinkButton({ category, query, heritages = [], city = "", state = "", fallbackUrl, label, loadingLabel, variant = "culture", size, className, icon }: Props) {
   const [loading, setLoading] = useState(false);
+  const [note, setNote] = useState<string | null>(null);
+
+  function go(tab: Window | null, url: string) {
+    if (tab) tab.location.href = url;
+    else window.open(url, "_blank", "noopener,noreferrer");
+  }
 
   async function handleClick() {
     const tab = window.open("", "_blank");
     if (tab) tab.opener = null;
     setLoading(true);
+    setNote(null);
     try {
       const res = await fetchLiveResults({ category, query, heritages, city, state });
-      const url = res.configured ? res.results[0]?.externalUrl : undefined;
-      if (tab) tab.location.href = url ?? fallbackUrl;
-      else window.open(url ?? fallbackUrl, "_blank", "noopener,noreferrer");
+      const url = res.configured ? res.results.find((r) => r.externalUrl)?.externalUrl : undefined;
+      if (url) {
+        go(tab, url);
+      } else if (fallbackUrl) {
+        go(tab, fallbackUrl);
+      } else {
+        tab?.close();
+        setNote(res.configured ? "No official page found online for this one." : "Link lookup isn't available right now.");
+      }
     } catch {
-      if (tab) tab.location.href = fallbackUrl;
-      else window.open(fallbackUrl, "_blank", "noopener,noreferrer");
+      if (fallbackUrl) {
+        go(tab, fallbackUrl);
+      } else {
+        tab?.close();
+        setNote("Couldn't look that up. Try again in a moment.");
+      }
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <Button variant={variant} size={size} className={className} onClick={handleClick} loading={loading} iconRight={!loading ? icon : undefined}>
-      {loading ? (loadingLabel ?? "Finding the real link…") : label}
-    </Button>
+    <span className="inline-flex flex-col items-start gap-1">
+      <Button variant={variant} size={size} className={className} onClick={handleClick} loading={loading} iconRight={!loading ? icon : undefined}>
+        {loading ? (loadingLabel ?? "Finding the real link…") : label}
+      </Button>
+      {note ? (
+        <span role="status" className="text-xs text-brown-muted">
+          {note}
+        </span>
+      ) : null}
+    </span>
   );
 }

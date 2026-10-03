@@ -64,7 +64,7 @@ export function MentorCard({ mentor: m, requested, onRequest, reasons, score }: 
         </Button>
         {requested ? (
           <Button variant="secondary" size="sm" disabled icon={<CheckCircle2 className="h-4 w-4 text-green" aria-hidden />}>
-            Request sent
+            Request saved
           </Button>
         ) : (
           <Button variant="profession" size="sm" onClick={() => onRequest?.(m)}>

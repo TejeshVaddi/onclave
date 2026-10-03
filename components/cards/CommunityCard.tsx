@@ -1,11 +1,14 @@
 "use client";
 
+import { useState } from "react";
 import { Bookmark, BookmarkCheck, Globe, MapPin } from "lucide-react";
 import type { Community, RecommendationReason } from "@/types";
 import { Card } from "@/components/ui/Card";
 import { Badge, Tag } from "@/components/ui/Badge";
 import { MatchReasons } from "@/components/ui/MatchReasons";
-import { CommunityLinkButton } from "@/components/community/CommunityLinkButton";
+import { Button } from "@/components/ui/Button";
+import { CommunityDetailModal } from "@/components/community/CommunityDetailModal";
+import { CommunityLinkButton, hasDirectLink } from "@/components/community/CommunityLinkButton";
 import { communityTypeLabel, platformLabel } from "@/services/communityService";
 import { cn } from "@/lib/utils";
 
@@ -28,6 +31,7 @@ const PLATFORM_MONO: Record<Community["platform"], string> = {
 };
 
 export function CommunityCard({ community: c, saved, onToggleSave, reasons, score, compact }: Props) {
+  const [open, setOpen] = useState(false);
   return (
     <Card as="article" pillar="community" interactive className={cn("flex flex-col", compact && "p-4")}>
       <div className="flex items-start gap-3">
@@ -78,9 +82,13 @@ export function CommunityCard({ community: c, saved, onToggleSave, reasons, scor
 
       {reasons?.length ? <MatchReasons reasons={reasons} score={score} className="mt-3" /> : null}
 
-      <div className="mt-4 flex items-center gap-2 pt-1">
-        <CommunityLinkButton community={c} size="sm" />
+      <div className="mt-4 flex flex-wrap items-center gap-2 pt-1">
+        <Button variant="community" size="sm" onClick={() => setOpen(true)}>
+          Learn More
+        </Button>
+        {hasDirectLink(c) ? <CommunityLinkButton community={c} variant="outline" size="sm" /> : null}
       </div>
+      <CommunityDetailModal community={c} open={open} onClose={() => setOpen(false)} />
     </Card>
   );
 }
