@@ -166,6 +166,8 @@ export interface PeopleSearchResponse {
   people: LivePerson[];
   sources?: LiveSource[];
   error?: string;
+  /** Why each provider failed, for diagnosing configuration; not shown to people. */
+  detail?: string;
 }
 
 export interface PersonMoreInfo {
@@ -189,4 +191,6 @@ export interface PersonAssistResponse {
   draft?: PersonDraft;
   sources?: LiveSource[];
   error?: string;
+  /** Why each provider failed, for diagnosing configuration; not shown to people. */
+  detail?: string;
 }

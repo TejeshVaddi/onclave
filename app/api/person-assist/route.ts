@@ -68,7 +68,8 @@ function draftPrompt(p: PersonRef, s: SenderRef): string {
     `Write a first message from a student or early-career person to a professional they found on a public page. Be warm, specific, and honest.`,
     `Sender: ${clip(s.name, 60) || "[your name]"}. Interested in: ${clip(s.professionLabel, 80)}. Background: ${s.heritages.length ? s.heritages.slice(0, 4).map((h) => clip(h, 40)).join(", ") : "not stated"}. Location: ${clip(`${s.city} ${s.state}`, 80) || "not stated"}. Other interests: ${s.interests.slice(0, 5).map((i) => clip(i, 40)).join(", ") || "not stated"}.`,
     `Recipient: ${clip(p.name, 80)}, ${clip(p.title, 100)} at ${clip(p.organization, 100)}. Their work: ${clip(p.fieldFit, 200)}. What their page says about questions or mentoring: "${clip(p.mentoringEvidence, 240)}".`,
-    `Rules: do not invent shared experiences, schools, mutual contacts, or accomplishments; where a detail is unknown, leave a bracketed placeholder like [your school or program]. Mention the sender's background only if it is natural and was provided. Ask for a short 15-minute conversation or answers to two specific questions, and say it is fine to decline. No flattery, no pressure. Sign off with the sender's first name (${first}).`,
+    `Rules: use ONLY the facts listed above. Do not add anything about the recipient's work, research topics, publications, opinions, or career beyond the "Their work" line, and do not claim to have read or admired anything specific. Do not state the sender's education level, school, employer, or status (student, graduate, intern) unless it is listed; where such a detail would help, write a bracketed placeholder such as [your school or program] or [something specific from their page]. Never invent shared experiences, mutual contacts, or accomplishments.`,
+    `Mention the sender's background only if it was provided and fits naturally. Ask for a short 15-minute conversation or answers to two questions that depend only on the recipient's field as listed (for example how they got started, or what they would advise someone starting out), and say it is fine to decline. No flattery, no pressure. Sign off with the sender's first name (${first}).`,
     `Respond with ONLY a JSON object (no markdown fences): {"subject": string (under 70 characters), "email": string (120 to 170 words, plain text with line breaks as \\n), "linkedinNote": string (under 280 characters), "directMessage": string (under 450 characters, for a social platform)}.`,
   ].join("\n");
 }
@@ -91,13 +92,22 @@ function toMoreInfo(o: Record<string, unknown>): PersonMoreInfo | null {
   };
 }
 
+/** Trims to a whole sentence within the limit, so a platform's length cap never cuts a message mid-word. */
+function fitTo(text: string, max: number): string {
+  const t = text.trim();
+  if (t.length <= max) return t;
+  const cut = t.slice(0, max);
+  const end = Math.max(cut.lastIndexOf(". "), cut.lastIndexOf("? "), cut.lastIndexOf("! "), cut.lastIndexOf("."));
+  return end > max * 0.5 ? cut.slice(0, end + 1).trim() : `${cut.slice(0, max - 1).trim()}…`;
+}
+
 function toDraft(o: Record<string, unknown>): PersonDraft | null {
   if (![o.subject, o.email, o.linkedinNote, o.directMessage].every(isNonEmptyString)) return null;
   return {
     subject: (o.subject as string).trim(),
     email: (o.email as string).replace(/\\n/g, "\n").trim(),
-    linkedinNote: (o.linkedinNote as string).trim(),
-    directMessage: (o.directMessage as string).trim(),
+    linkedinNote: fitTo(o.linkedinNote as string, 280),
+    directMessage: fitTo(o.directMessage as string, 450),
   };
 }
 
@@ -122,17 +132,21 @@ export async function POST(request: Request): Promise<Response> {
       if (!info) return Response.json({ configured: true, error: "Couldn't find more public information." } satisfies PersonAssistResponse);
       return Response.json({ configured: true, info, sources: sources.slice(0, 8) } satisfies PersonAssistResponse);
     } catch (err) {
-      console.warn("Person more-info failed:", err instanceof Error ? err.message : err);
-      return Response.json({ configured: true, error: "Couldn't look that up right now." } satisfies PersonAssistResponse);
+      const detail = err instanceof Error ? err.message : String(err);
+      console.warn("Person more-info failed:", detail);
+      return Response.json({ configured: true, error: "Couldn't look that up right now.", detail } satisfies PersonAssistResponse);
     }
   }
 
+  let detail: string | undefined;
   try {
     const { text } = await plainText(keys, draftPrompt(body.person, body.sender));
     const draft = toDraft(parseObject(text) ?? {});
     if (draft) return Response.json({ configured: true, draft } satisfies PersonAssistResponse);
+    detail = "The model's reply was not a usable draft.";
   } catch (err) {
-    console.warn("Draft failed:", err instanceof Error ? err.message : err);
+    detail = err instanceof Error ? err.message : String(err);
+    console.warn("Draft failed:", detail);
   }
-  return Response.json({ configured: true, error: "Couldn't write a draft right now." } satisfies PersonAssistResponse);
+  return Response.json({ configured: true, error: "Couldn't write a draft right now.", detail } satisfies PersonAssistResponse);
 }

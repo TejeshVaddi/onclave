@@ -58,7 +58,8 @@ export async function POST(request: Request): Promise<Response> {
     }
     return Response.json(payload);
   } catch (err) {
-    console.warn("People search failed:", err instanceof Error ? err.message : err);
-    return Response.json({ configured: true, people: [], error: "Search is temporarily unavailable." } satisfies PeopleSearchResponse);
+    const detail = err instanceof Error ? err.message : String(err);
+    console.warn("People search failed:", detail);
+    return Response.json({ configured: true, people: [], error: "Search is temporarily unavailable.", detail } satisfies PeopleSearchResponse);
   }
 }

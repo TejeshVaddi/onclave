@@ -12,6 +12,8 @@ import type { LiveSource } from "@/services/gemini/types";
 export const DEFAULT_OPENROUTER_MODEL = "anthropic/claude-haiku-5.5";
 const REQUEST_TIMEOUT_MS = 60_000;
 const WEB_RESULTS = 6;
+/** OpenRouter reserves credit for the longest possible reply, so an uncapped request can be refused on a small balance. */
+const MAX_REPLY_TOKENS = 6000;
 
 interface OpenRouterAnnotation {
   type?: string;
@@ -41,6 +43,7 @@ export async function callOpenRouter(apiKey: string, prompt: string, opts: { web
       body: JSON.stringify({
         model,
         messages: [{ role: "user", content: prompt }],
+        max_tokens: MAX_REPLY_TOKENS,
         ...(opts.web ? { plugins: [{ id: "web", max_results: WEB_RESULTS }] } : {}),
       }),
     });
@@ -59,8 +62,7 @@ export async function callOpenRouter(apiKey: string, prompt: string, opts: { web
     .filter((a) => a.type === "url_citation" && a.url_citation?.url)
     .map((a) => ({ title: a.url_citation?.title || (a.url_citation?.url as string), url: a.url_citation?.url as string }));
 
-  // A web search that returned nothing to cite was not a grounded answer.
-  if (opts.web && sources.length === 0) throw new Error("OpenRouter web search returned no sources");
-
+  // Citations are not returned for every model, so an empty list is not a failure:
+  // whatever is claimed is checked against its own page before it is shown.
   return { text: message?.content ?? "", sources, model };
 }
