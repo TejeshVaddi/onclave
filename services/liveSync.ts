@@ -13,8 +13,9 @@ import { communityFromLive, eventFromLive, mentorFromLive, placeFromLive, type C
  */
 const TTL_MS = 24 * 60 * 60 * 1000;
 const EMPTY_RETRY_MS = 2 * 60 * 60 * 1000;
-const CONCURRENCY = 2;
-const MAX_HERITAGES = 3;
+// One at a time: bursts of simultaneous searches are what trip per-minute rate limits.
+const CONCURRENCY = 1;
+const MAX_HERITAGES = 2;
 
 interface Job {
   key: string;
@@ -25,21 +26,17 @@ interface Job {
 
 function jobsFor(user: User): Job[] {
   const where = `${user.location.city.trim().toLowerCase()}|${(user.location.state ?? "").trim().toLowerCase()}`;
-  const jobs: Job[] = [];
   const heritages = user.heritages.slice(0, MAX_HERITAGES);
   const categories: LiveSearchCategory[] = ["community", "events", "places", "food"];
 
-  for (const h of heritages) {
-    for (const category of categories) {
-      jobs.push({ key: `${category}|${h}|${where}`, category, heritages: [h], query: "" });
-    }
-  }
+  // One search per category covering the chosen heritages together: every search
+  // spends API quota, so a profile costs a handful of searches, not dozens.
+  const jobs: Job[] = categories.map((category) => ({ key: `${category}|${[...heritages].sort().join(",")}|${where}`, category, heritages, query: "" }));
 
   const profession = user.profession ? getProfession(user.profession) : undefined;
   if (profession) {
-    const hs = user.heritages.slice(0, 2);
-    jobs.push({ key: `community|prof:${profession.id}|${hs.join(",")}|${where}`, category: "community", heritages: hs, query: `${profession.label} professionals and students` });
-    jobs.push({ key: `events|prof:${profession.id}|${hs.join(",")}|${where}`, category: "events", heritages: hs, query: `${profession.label} career panels, networking, and workshops` });
+    jobs.push({ key: `community|prof:${profession.id}|${[...heritages].sort().join(",")}|${where}`, category: "community", heritages, query: `${profession.label} professionals and students` });
+    jobs.push({ key: `events|prof:${profession.id}|${[...heritages].sort().join(",")}|${where}`, category: "events", heritages, query: `${profession.label} career panels, networking, and workshops` });
   }
   return jobs;
 }

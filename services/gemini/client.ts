@@ -74,11 +74,40 @@ export async function callGemini(apiKey: string, prompt: string, withGrounding: 
 }
 
 /**
- * Models to try for Google Search grounding, in order. Which models may use
- * grounding differs by account and plan, so when the configured model is
- * refused, the next one is tried before giving up on live web search.
+ * Which models can use Google Search grounding differs by account, and Google
+ * retires model names, so the list is read from the API instead of guessed.
+ * Free-tier quota is tracked per model, so a model that is out of quota or
+ * overloaded is followed by the next newest Flash model.
  */
-const GROUNDING_MODELS = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-2.5-flash-lite"];
+const MODEL_LIST_TTL_MS = 6 * 60 * 60 * 1000;
+let modelListCache: { at: number; names: string[] } | null = null;
+
+/** Text Flash models only: not image, audio, live, or embedding variants. */
+export const FLASH_TEXT_MODEL = /^gemini-\d+(\.\d+)?-flash(-lite)?(-\d+)?(-preview(-[\w.]+)*)?$/;
+
+function versionOf(name: string): number {
+  const m = name.match(/gemini-(\d+(?:\.\d+)?)/);
+  return m ? parseFloat(m[1]) : 0;
+}
+
+/** Current Flash models that can generate text, newest first. Empty if the list cannot be read. */
+async function currentFlashModels(apiKey: string): Promise<string[]> {
+  if (modelListCache && Date.now() - modelListCache.at < MODEL_LIST_TTL_MS) return modelListCache.names;
+  try {
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?pageSize=200&key=${encodeURIComponent(apiKey)}`, { signal: AbortSignal.timeout(10_000) });
+    if (!res.ok) return [];
+    const data = (await res.json()) as { models?: { name?: string; supportedGenerationMethods?: string[] }[] };
+    const names = (data.models ?? [])
+      .filter((m) => m.name && m.supportedGenerationMethods?.includes("generateContent"))
+      .map((m) => (m.name as string).replace(/^models\//, ""))
+      .filter((n) => FLASH_TEXT_MODEL.test(n))
+      .sort((a, b) => versionOf(b) - versionOf(a) || Number(/lite/.test(a)) - Number(/lite/.test(b)) || Number(/preview/.test(a)) - Number(/preview/.test(b)));
+    modelListCache = { at: Date.now(), names };
+    return names;
+  } catch {
+    return [];
+  }
+}
 
 export interface GroundedCall {
   text: string;
@@ -86,11 +115,23 @@ export interface GroundedCall {
   model: string;
 }
 
-/** A grounded call that walks the model list. Throws only if every model refused, with each reason. */
+/** Thrown when no model could run a grounded search. `transient` means every failure was quota or overload. */
+export class GroundingUnavailableError extends Error {
+  constructor(
+    message: string,
+    readonly transient: boolean,
+  ) {
+    super(message);
+  }
+}
+
+/** A grounded call that walks the current Flash models. Throws only if every model refused, with each reason. */
 export async function callGeminiGrounded(apiKey: string, prompt: string): Promise<GroundedCall> {
   const configured = process.env.GEMINI_MODEL?.trim() || DEFAULT_MODEL;
-  const models = [configured, ...GROUNDING_MODELS.filter((m) => m !== configured)];
+  const discovered = await currentFlashModels(apiKey);
+  const models = [configured, ...discovered.filter((m) => m !== configured)].slice(0, 4);
   const failures: string[] = [];
+  let transient = true;
   for (const model of models) {
     try {
       const { text, sources } = await callGemini(apiKey, prompt, true, model);
@@ -98,11 +139,15 @@ export async function callGeminiGrounded(apiKey: string, prompt: string): Promis
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       failures.push(`${model}: ${msg.replace(/\s+/g, " ").slice(0, 160)}`);
+      if (!/ (429|503) /.test(msg)) transient = false;
       // A rejected key will not work on any model.
-      if (/ 40[13] /.test(msg) || /API key not valid|UNAUTHENTICATED/i.test(msg)) break;
+      if (/ 40[13] /.test(msg) || /API key not valid|UNAUTHENTICATED/i.test(msg)) {
+        transient = false;
+        break;
+      }
     }
   }
-  throw new Error(`Grounded search unavailable. ${failures.join(" | ")}`);
+  throw new GroundingUnavailableError(`Grounded search unavailable. ${failures.join(" | ")}`, transient);
 }
 
 export async function runGeminiSearch(
@@ -118,6 +163,8 @@ export async function runGeminiSearch(
     ({ text, sources } = await callGeminiGrounded(apiKey, buildSearchPrompt(req, true, MAX_RESULTS)));
   } catch (err) {
     groundingNote = err instanceof Error ? err.message : String(err);
+    // Out of quota or overloaded: another Gemini call would fail the same way, so let the caller use its backup.
+    if (err instanceof GroundingUnavailableError && err.transient) throw err;
     // Grounding can be gated by quota/billing separately from plain
     // generation on some accounts. Fall back once to ungrounded generation
     // rather than surfacing nothing — the response is clearly marked
