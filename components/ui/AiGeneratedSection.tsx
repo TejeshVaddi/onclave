@@ -25,7 +25,7 @@ interface Props {
   enabled: boolean;
 }
 
-const PROVIDER_LABEL: Record<string, string> = { gemini: "Gemini", groq: "Groq" };
+const PROVIDER_LABEL: Record<string, string> = { gemini: "Gemini", openrouter: "OpenRouter", groq: "Groq" };
 
 /**
  * Renders an AI-synthesized example — a full recipe, or plain-language

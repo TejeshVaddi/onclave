@@ -1,5 +1,4 @@
-import type { LiveResultItem, LiveSearchRequest, LiveSource } from "./types";
-import { buildGeneratePrompt, buildSearchPrompt, extractJsonArray, toItem } from "@/services/llm/shared";
+import type { LiveSource } from "./types";
 
 /**
  * Server-only Gemini client. This module must only ever be imported from a
@@ -19,8 +18,6 @@ const DEFAULT_MODEL = "gemini-3.6-flash";
 // Gemini 3.x models reason internally before answering, which runs longer
 // without search grounding to lean on, so this needs real headroom.
 const REQUEST_TIMEOUT_MS = 60_000;
-/** Candidates asked of the model; fewer survive the existence check. */
-const MAX_RESULTS = 12;
 
 interface GeminiApiPart {
   text?: string;
@@ -148,50 +145,4 @@ export async function callGeminiGrounded(apiKey: string, prompt: string): Promis
     }
   }
   throw new GroundingUnavailableError(`Grounded search unavailable. ${failures.join(" | ")}`, transient);
-}
-
-export async function runGeminiSearch(
-  apiKey: string,
-  req: LiveSearchRequest,
-): Promise<{ results: LiveResultItem[]; sources: LiveSource[]; grounded: boolean; groundingNote?: string }> {
-  let grounded = true;
-  let groundingNote: string | undefined;
-  let text: string;
-  let sources: LiveSource[];
-
-  try {
-    ({ text, sources } = await callGeminiGrounded(apiKey, buildSearchPrompt(req, true, MAX_RESULTS)));
-  } catch (err) {
-    groundingNote = err instanceof Error ? err.message : String(err);
-    // Out of quota or overloaded: another Gemini call would fail the same way, so let the caller use its backup.
-    if (err instanceof GroundingUnavailableError && err.transient) throw err;
-    // Grounding can be gated by quota/billing separately from plain
-    // generation on some accounts. Fall back once to ungrounded generation
-    // rather than surfacing nothing — the response is clearly marked
-    // `grounded: false` so the UI can disclose it's not independently verified.
-    console.warn("Gemini grounded search failed, retrying without grounding:", err instanceof Error ? err.message : err);
-    grounded = false;
-    ({ text, sources } = await callGemini(apiKey, buildSearchPrompt(req, false, MAX_RESULTS), false));
-  }
-
-  const raw = extractJsonArray(text);
-  const results = raw
-    .map((item) => toItem(item, req.category))
-    .filter((item): item is LiveResultItem => item !== null)
-    .slice(0, MAX_RESULTS);
-  return { results, sources: sources.slice(0, 12), grounded, groundingNote };
-}
-
-/**
- * Synthesizes ONE example (a recipe, or guidance for finding a real
- * community/place/event/program) when nothing real matched locally or via
- * search. Never uses grounding — this is explicitly not a "search for a
- * real one" call. Throws on transport/API failure so the caller
- * (app/api/ai-generate) can fall back to Groq.
- */
-export async function generateWithGemini(apiKey: string, req: LiveSearchRequest): Promise<LiveResultItem | null> {
-  const { text } = await callGemini(apiKey, buildGeneratePrompt(req), false);
-  const raw = extractJsonArray(text);
-  const item = raw.map((r) => toItem(r, req.category)).find((r): r is LiveResultItem => r !== null);
-  return item ?? null;
 }

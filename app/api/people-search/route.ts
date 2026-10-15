@@ -1,4 +1,4 @@
-import { callGeminiGrounded } from "@/services/gemini/client";
+import { groundedText, hasSearchKey, providerKeys } from "@/services/llm/providers";
 import { buildPeoplePrompt, parsePeople, verifyPeople } from "@/services/llm/people";
 import type { PeopleSearchRequest, PeopleSearchResponse } from "@/services/gemini/types";
 
@@ -24,15 +24,15 @@ function isValidBody(body: unknown): body is PeopleSearchRequest {
 }
 
 /**
- * Real people to learn from. This uses Gemini with Google Search grounding
- * only: a model answering from memory would invent people, and Groq has no
- * web access, so there is deliberately no fallback. Every person returned has
- * been checked against the public page that describes them (see
- * services/llm/people).
+ * Real people to learn from. This needs a provider that can search the web
+ * (Gemini with Google Search grounding, or OpenRouter's web plugin): a model
+ * answering from memory would invent people, so there is deliberately no
+ * memory-only fallback. Every person returned has been checked against the
+ * public page that describes them (see services/llm/people).
  */
 export async function POST(request: Request): Promise<Response> {
-  const geminiKey = process.env.GEMINI_API_KEY?.trim();
-  if (!geminiKey) return Response.json({ configured: false, people: [] } satisfies PeopleSearchResponse);
+  const keys = providerKeys();
+  if (!hasSearchKey(keys)) return Response.json({ configured: false, people: [] } satisfies PeopleSearchResponse);
 
   let body: unknown;
   try {
@@ -49,7 +49,7 @@ export async function POST(request: Request): Promise<Response> {
   if (hit && Date.now() - hit.at < CACHE_TTL_MS) return Response.json(hit.payload);
 
   try {
-    const { text, sources } = await callGeminiGrounded(geminiKey, buildPeoplePrompt(body, MAX_CANDIDATES));
+    const { text, sources } = await groundedText(keys, buildPeoplePrompt(body, MAX_CANDIDATES));
     const people = (await verifyPeople(parsePeople(text))).slice(0, MAX_RETURNED);
     const payload: PeopleSearchResponse = { configured: true, people, sources: sources.slice(0, 12) };
     if (people.length) {

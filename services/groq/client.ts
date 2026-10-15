@@ -1,5 +1,3 @@
-import type { LiveResultItem, LiveSearchRequest, LiveSource } from "@/services/gemini/types";
-import { buildGeneratePrompt, buildSearchPrompt, extractJsonArray, toItem } from "@/services/llm/shared";
 
 /**
  * Server-only Groq client — the backup provider when Gemini is unavailable
@@ -13,7 +11,6 @@ import { buildGeneratePrompt, buildSearchPrompt, extractJsonArray, toItem } from
  */
 const DEFAULT_MODEL = "openai/gpt-oss-120b";
 const REQUEST_TIMEOUT_MS = 30_000;
-const MAX_RESULTS = 12;
 
 interface GroqApiResponse {
   choices?: { message?: { content?: string } }[];
@@ -47,23 +44,4 @@ export async function callGroq(apiKey: string, prompt: string): Promise<string> 
 
   const data = (await res.json()) as GroqApiResponse;
   return data.choices?.[0]?.message?.content ?? "";
-}
-
-/** Backup for the "find real ones" search, used only when Gemini's own search+fallback both fail. */
-export async function runGroqSearch(apiKey: string, req: LiveSearchRequest): Promise<{ results: LiveResultItem[]; sources: LiveSource[] }> {
-  const text = await callGroq(apiKey, buildSearchPrompt(req, false, MAX_RESULTS));
-  const raw = extractJsonArray(text);
-  const results = raw
-    .map((item) => toItem(item, req.category))
-    .filter((item): item is LiveResultItem => item !== null)
-    .slice(0, MAX_RESULTS);
-  return { results, sources: [] };
-}
-
-/** Backup for AI generation (e.g. a recipe), used only when Gemini generation fails. */
-export async function generateWithGroq(apiKey: string, req: LiveSearchRequest): Promise<LiveResultItem | null> {
-  const text = await callGroq(apiKey, buildGeneratePrompt(req));
-  const raw = extractJsonArray(text);
-  const item = raw.map((r) => toItem(r, req.category)).find((r): r is LiveResultItem => r !== null);
-  return item ?? null;
 }

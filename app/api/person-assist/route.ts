@@ -1,5 +1,4 @@
-import { callGemini, callGeminiGrounded } from "@/services/gemini/client";
-import { callGroq } from "@/services/groq/client";
+import { groundedText, hasAnyKey, hasSearchKey, plainText, providerKeys } from "@/services/llm/providers";
 import { clip, asStringArray, isNonEmptyString } from "@/services/llm/shared";
 import type { PersonAssistResponse, PersonDraft, PersonMoreInfo } from "@/services/gemini/types";
 
@@ -103,9 +102,8 @@ function toDraft(o: Record<string, unknown>): PersonDraft | null {
 }
 
 export async function POST(request: Request): Promise<Response> {
-  const geminiKey = process.env.GEMINI_API_KEY?.trim();
-  const groqKey = process.env.GROQ_API_KEY?.trim();
-  if (!geminiKey && !groqKey) return Response.json({ configured: false } satisfies PersonAssistResponse);
+  const keys = providerKeys();
+  if (!hasAnyKey(keys)) return Response.json({ configured: false } satisfies PersonAssistResponse);
 
   let body: unknown;
   try {
@@ -117,9 +115,9 @@ export async function POST(request: Request): Promise<Response> {
 
   if (body.action === "more-info") {
     // Needs live web access: a model answering from memory would invent a career.
-    if (!geminiKey) return Response.json({ configured: true, error: "Looking up more information needs web search." } satisfies PersonAssistResponse);
+    if (!hasSearchKey(keys)) return Response.json({ configured: true, error: "Looking up more information needs web search." } satisfies PersonAssistResponse);
     try {
-      const { text, sources } = await callGeminiGrounded(geminiKey, moreInfoPrompt(body.person));
+      const { text, sources } = await groundedText(keys, moreInfoPrompt(body.person));
       const info = toMoreInfo(parseObject(text) ?? {});
       if (!info) return Response.json({ configured: true, error: "Couldn't find more public information." } satisfies PersonAssistResponse);
       return Response.json({ configured: true, info, sources: sources.slice(0, 8) } satisfies PersonAssistResponse);
@@ -129,24 +127,12 @@ export async function POST(request: Request): Promise<Response> {
     }
   }
 
-  const prompt = draftPrompt(body.person, body.sender);
-  if (geminiKey) {
-    try {
-      const { text } = await callGemini(geminiKey, prompt, false);
-      const draft = toDraft(parseObject(text) ?? {});
-      if (draft) return Response.json({ configured: true, draft } satisfies PersonAssistResponse);
-    } catch (err) {
-      console.warn("Gemini draft failed, trying Groq:", err instanceof Error ? err.message : err);
-    }
-  }
-  if (groqKey) {
-    try {
-      const draft = toDraft(parseObject(await callGroq(groqKey, prompt)) ?? {});
-      if (draft) return Response.json({ configured: true, draft } satisfies PersonAssistResponse);
-    } catch (err) {
-      console.warn("Groq draft failed:", err instanceof Error ? err.message : err);
-    }
+  try {
+    const { text } = await plainText(keys, draftPrompt(body.person, body.sender));
+    const draft = toDraft(parseObject(text) ?? {});
+    if (draft) return Response.json({ configured: true, draft } satisfies PersonAssistResponse);
+  } catch (err) {
+    console.warn("Draft failed:", err instanceof Error ? err.message : err);
   }
   return Response.json({ configured: true, error: "Couldn't write a draft right now." } satisfies PersonAssistResponse);
 }
-

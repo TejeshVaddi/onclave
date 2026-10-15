@@ -1,5 +1,5 @@
-import { runGeminiSearch } from "@/services/gemini/client";
-import { runGroqSearch } from "@/services/groq/client";
+import { groundedText, hasAnyKey, plainText, providerKeys } from "@/services/llm/providers";
+import { buildSearchPrompt, extractJsonArray, toItem } from "@/services/llm/shared";
 import { verifyResults } from "@/services/llm/verify";
 import type { LiveResultItem, LiveSearchCategory, LiveSearchRequest, LiveSearchResponse, LiveSource } from "@/services/gemini/types";
 
@@ -7,6 +7,8 @@ import type { LiveResultItem, LiveSearchCategory, LiveSearchRequest, LiveSearchR
 export const maxDuration = 60;
 
 const CATEGORIES: LiveSearchCategory[] = ["community", "food", "places", "events", "recipe", "mentorProgram"];
+/** Candidates asked of the model; fewer survive the existence check. */
+const CANDIDATES = 12;
 const MAX_RETURNED = 8;
 const CACHE_TTL_MS = 6 * 60 * 60 * 1000;
 const CACHE_MAX_ENTRIES = 300;
@@ -30,22 +32,25 @@ function isValidBody(body: unknown): body is LiveSearchRequest {
   );
 }
 
-async function confirmed(results: LiveResultItem[], sources: LiveSource[]): Promise<LiveResultItem[]> {
-  return (await verifyResults(results, sources)).slice(0, MAX_RETURNED);
+async function confirmed(text: string, category: LiveSearchCategory, sources: LiveSource[]): Promise<LiveResultItem[]> {
+  const candidates = extractJsonArray(text)
+    .map((item) => toItem(item, category))
+    .filter((item): item is LiveResultItem => item !== null)
+    .slice(0, CANDIDATES);
+  return (await verifyResults(candidates, sources)).slice(0, MAX_RETURNED);
 }
 
 /**
- * Live search backed by the Gemini API with Google Search grounding, with
- * Groq as a backup provider when Gemini fails entirely. Whatever a model
- * returns is only a list of candidates: each one is kept only after the
- * server opens its page and finds its name there (see services/llm/verify).
- * Returns `{ configured: false }` (not an error) whenever neither
- * GEMINI_API_KEY nor GROQ_API_KEY is set.
+ * Live search. A provider with web access (Gemini with Google Search
+ * grounding, or OpenRouter's web plugin) is asked for candidates; if none can
+ * search, a model's memory is used as a last resort. Either way the answer is
+ * only a list of candidates: each one is kept only after the server opens its
+ * page and finds its name there (see services/llm/verify). Returns
+ * `{ configured: false }` (not an error) when no provider key is set.
  */
 export async function POST(request: Request): Promise<Response> {
-  const geminiKey = process.env.GEMINI_API_KEY?.trim();
-  const groqKey = process.env.GROQ_API_KEY?.trim();
-  if (!geminiKey && !groqKey) {
+  const keys = providerKeys();
+  if (!hasAnyKey(keys)) {
     return Response.json({ configured: false, results: [] } satisfies LiveSearchResponse);
   }
 
@@ -72,28 +77,26 @@ export async function POST(request: Request): Promise<Response> {
     return Response.json(payload);
   };
 
-  if (geminiKey) {
-    try {
-      const { results, sources, grounded, groundingNote } = await runGeminiSearch(geminiKey, body);
-      if (groundingNote) console.warn("Live search ran without web grounding:", groundingNote);
-      return remember({ configured: true, results: await confirmed(results, sources), sources, grounded, groundingNote });
-    } catch (err) {
-      console.warn("Gemini live search failed, trying Groq:", err instanceof Error ? err.message : err);
-    }
+  let groundingNote: string | undefined;
+  try {
+    const r = await groundedText(keys, buildSearchPrompt(body, true, CANDIDATES));
+    return remember({ configured: true, results: await confirmed(r.text, body.category, r.sources), sources: r.sources, grounded: true, provider: r.provider });
+  } catch (err) {
+    groundingNote = err instanceof Error ? err.message : String(err);
+    console.warn("Live search ran without web access:", groundingNote);
   }
 
-  if (groqKey) {
-    try {
-      const { results, sources } = await runGroqSearch(groqKey, body);
-      return remember({ configured: true, results: await confirmed(results, sources), sources, grounded: false });
-    } catch (err) {
-      console.error("Groq live search failed:", err);
-    }
+  try {
+    const r = await plainText(keys, buildSearchPrompt(body, false, CANDIDATES));
+    return remember({ configured: true, results: await confirmed(r.text, body.category, []), sources: [], grounded: false, groundingNote, provider: r.provider });
+  } catch (err) {
+    console.error("Live search failed:", err instanceof Error ? err.message : err);
   }
 
   return Response.json({
     configured: true,
     results: [],
+    groundingNote,
     error: "Live search is temporarily unavailable.",
   } satisfies LiveSearchResponse);
 }

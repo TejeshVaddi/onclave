@@ -104,6 +104,8 @@ export interface LiveSearchResponse {
   grounded?: boolean;
   /** Why web search grounding was unavailable, when it was. For diagnosing configuration; not shown to people. */
   groundingNote?: string;
+  /** Which provider answered. For diagnosing configuration; not shown to people. */
+  provider?: string;
   error?: string;
 }
 
@@ -118,7 +120,7 @@ export interface AiGenerateResponse {
   configured: boolean;
   generated: boolean;
   item?: LiveResultItem;
-  provider?: "gemini" | "groq";
+  provider?: "gemini" | "openrouter" | "groq";
   error?: string;
 }
 
