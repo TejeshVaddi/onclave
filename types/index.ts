@@ -257,6 +257,8 @@ export interface CulturalEvent {
   /** The event's own page, confirmed to exist. */
   externalUrl?: string;
   art: ArtTone;
+  /** A cultural celebration or national day rather than a ticketed or hosted event: no venue, organizer, or ticket. */
+  kind?: "celebration";
 }
 
 /* ------------------------------------------------------------------ */

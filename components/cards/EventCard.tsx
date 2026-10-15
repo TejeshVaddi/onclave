@@ -70,7 +70,7 @@ export function EventCard({ event: e, saved, onToggleSave, onLearnMore, reasons,
         ) : null}
         <p className="flex items-center gap-1.5">
           {e.isVirtual ? <Video className="h-3.5 w-3.5 text-berry" aria-hidden /> : <MapPin className="h-3.5 w-3.5 text-berry" aria-hidden />}
-          {e.isVirtual ? e.venue : `${e.venue} · ${e.city}, ${e.state}`}
+          {e.isVirtual || e.kind === "celebration" ? e.venue : `${e.venue} · ${[e.city, e.state].filter(Boolean).join(", ")}`}
         </p>
       </div>
 
@@ -80,7 +80,7 @@ export function EventCard({ event: e, saved, onToggleSave, onLearnMore, reasons,
         {e.tags.slice(0, 3).map((t) => (
           <Tag key={t}>{t}</Tag>
         ))}
-        <Tag>{e.price}</Tag>
+        {e.kind === "celebration" ? null : <Tag>{e.price}</Tag>}
       </div>
 
       {reasons?.length ? <MatchReasons reasons={reasons} score={score} className="mt-3" /> : null}

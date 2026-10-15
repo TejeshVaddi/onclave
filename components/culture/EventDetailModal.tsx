@@ -37,6 +37,7 @@ export function EventDetailModal({
   const e = event;
   const where = e.isVirtual ? e.venue : [e.venue, e.address ?? [e.city, e.state].filter(Boolean).join(", ")].filter(Boolean).join(", ");
   const free = /^free\b/i.test(e.price);
+  const celebration = e.kind === "celebration";
 
   return (
     <Modal
@@ -50,14 +51,14 @@ export function EventDetailModal({
           <Button variant="ghost" onClick={() => onToggleSave(e.id)} icon={saved ? <BookmarkCheck className="h-4 w-4 text-berry" aria-hidden /> : <Bookmark className="h-4 w-4" aria-hidden />}>
             {saved ? "Saved" : "Save event"}
           </Button>
-          {!e.isVirtual ? (
+          {!e.isVirtual && !celebration ? (
             <Button variant="outline" href={directionsUrl(where)} external iconRight={<ExternalLink className="h-4 w-4" aria-hidden />}>
               Directions
             </Button>
           ) : null}
           {e.externalUrl ? (
             <Button variant="culture" href={e.externalUrl} external iconRight={<ExternalLink className="h-4 w-4" aria-hidden />}>
-              {free ? "Event page" : "Event page and tickets"}
+              {celebration ? "Read more" : free ? "Event page" : "Event page and tickets"}
             </Button>
           ) : null}
         </>
@@ -74,13 +75,17 @@ export function EventDetailModal({
             <Clock className="h-4 w-4 shrink-0 text-berry" aria-hidden /> {e.timeLabel}
           </p>
         ) : null}
-        <p className="flex items-start gap-2">
-          {e.isVirtual ? <Video className="mt-0.5 h-4 w-4 shrink-0 text-berry" aria-hidden /> : <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-berry" aria-hidden />}
-          {where}
-        </p>
-        <p className="flex items-center gap-2">
-          <Ticket className="h-4 w-4 shrink-0 text-berry" aria-hidden /> {e.price}
-        </p>
+        {celebration ? null : (
+          <>
+            <p className="flex items-start gap-2">
+              {e.isVirtual ? <Video className="mt-0.5 h-4 w-4 shrink-0 text-berry" aria-hidden /> : <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-berry" aria-hidden />}
+              {where}
+            </p>
+            <p className="flex items-center gap-2">
+              <Ticket className="h-4 w-4 shrink-0 text-berry" aria-hidden /> {e.price}
+            </p>
+          </>
+        )}
       </div>
 
       <p className="mt-4 text-sm leading-relaxed text-brown-muted">{e.description}</p>
@@ -100,9 +105,11 @@ export function EventDetailModal({
         </Section>
       ) : null}
 
-      <Section title="Organizer">
-        <p className="text-sm font-medium text-brown">{e.organizer}</p>
-      </Section>
+      {celebration ? null : (
+        <Section title="Organizer">
+          <p className="text-sm font-medium text-brown">{e.organizer}</p>
+        </Section>
+      )}
 
       {e.tags.length ? (
         <div className="mt-5 flex flex-wrap items-center gap-2">

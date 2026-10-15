@@ -248,6 +248,46 @@ export interface Verdict {
   reason: string;
 }
 
+/**
+ * Independent proof that a page exists, for sites that show crawlers an empty
+ * shell (Reddit answers 200 for any made-up subreddit). The Internet Archive's
+ * index only holds pages that were really served, so a missing entry for an
+ * invented address is meaningful and a present one is evidence the page exists.
+ */
+export async function wasArchived(url: string): Promise<boolean> {
+  let u: URL;
+  try {
+    u = new URL(url);
+  } catch {
+    return false;
+  }
+  const base = `${u.hostname.replace(/^www\./, "")}${u.pathname.replace(/\/+$/, "")}`;
+  const wanted = u.pathname.replace(/\/+$/, "").toLowerCase();
+  const endpoint = `https://web.archive.org/cdx/search/cdx?url=${encodeURIComponent(base)}&matchType=prefix&limit=25&output=json&fl=original&filter=statuscode:200`;
+
+  // The archive throttles bursts, which looks the same as "not found", so one slow retry is worth it.
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const res = await fetch(endpoint, { signal: AbortSignal.timeout(attempt === 0 ? 8_000 : 12_000) });
+      if (!res.ok) continue;
+      const rows = (await res.json()) as string[][];
+      const found = rows.slice(1).some((r) => {
+        try {
+          const p = new URL(r[0]).pathname.replace(/\/+$/, "").toLowerCase();
+          return p === wanted || p.startsWith(`${wanted}/`);
+        } catch {
+          return false;
+        }
+      });
+      if (found) return true;
+      if (rows.length > 1) return false; // The archive answered with other pages, so this address really is absent.
+    } catch {
+      /* try once more */
+    }
+  }
+  return false;
+}
+
 /** Share of a name's distinctive words that appear in a web address (words run together there, so substring match). */
 function addressScore(name: string, url: string): number {
   let u: URL;
@@ -268,10 +308,9 @@ function addressScore(name: string, url: string): number {
  * shell (a lot of small sites) are judged by whether their address is named
  * for the result. Social platforms that hide content from crawlers are
  * accepted only when the link is a specific page (not a search or a bare
- * homepage) and it names the result or the platform appears among the search
- * sources.
+ * homepage) that the Internet Archive has a record of.
  */
-export async function verifyNamedPage(name: string, url: string, groundedHosts: Set<string>, minScore = 0.6): Promise<Verdict> {
+export async function verifyNamedPage(name: string, url: string, _groundedHosts: Set<string>, minScore = 0.6): Promise<Verdict> {
   const probe = await probePage(url);
   const finalUrl = probe.finalUrl || url;
   const host = hostOf(finalUrl);
@@ -293,10 +332,9 @@ export async function verifyNamedPage(name: string, url: string, groundedHosts: 
       /* handled below */
     }
     const specific = path.replace(/\/+$/, "").length > 1 && !/\/(search|login|signup|explore)(\/|$)/i.test(path);
-    const slug = normalizeText(decodeURIComponent(path)).replace(/[^a-z0-9]+/g, " ");
-    const slugHasName = distinctiveTokens(name).some((t) => t.length >= 3 && slug.includes(t));
-    const searchedIt = [...groundedHosts].some((h) => h === host || h.endsWith(`.${host}`) || host.endsWith(`.${h}`));
-    if (specific && (slugHasName || searchedIt)) return { ok: true, finalUrl: url, pageTitle: probe.title, reason: "specific platform page that hides content from crawlers" };
+    // A platform that shows an empty page to everyone cannot confirm the page itself, so the
+    // address must also appear in the Internet Archive's record of pages that were really served.
+    if (specific && (await wasArchived(url))) return { ok: true, finalUrl: url, pageTitle: probe.title, reason: "page exists per the Internet Archive" };
   }
 
   if (probe.readable) return { ok: false, reason: `page does not mention "${name}"` };

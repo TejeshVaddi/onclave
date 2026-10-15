@@ -1,7 +1,7 @@
 import type { HeritageId, User } from "@/types";
 import type { LiveSearchCategory } from "@/services/gemini/types";
 import { getProfession } from "@/data/professions";
-import { fetchLiveResults, fetchPeople } from "@/services/liveSearch";
+import { fetchLiveResults, fetchOsmPlaces, fetchPeople } from "@/services/liveSearch";
 import { liveStore } from "@/services/liveStore";
 import { communityFromLive, eventFromLive, mentorFromLive, placeFromLive, type ConvertContext } from "@/services/liveConvert";
 
@@ -22,26 +22,61 @@ interface Job {
   category: LiveSearchCategory;
   heritages: HeritageId[];
   query: string;
+  /** "osm" asks OpenStreetMap (no key needed); "ai" asks a web-searching model. */
+  source: "osm" | "ai";
 }
 
 function jobsFor(user: User): Job[] {
   const where = `${user.location.city.trim().toLowerCase()}|${(user.location.state ?? "").trim().toLowerCase()}`;
   const heritages = user.heritages.slice(0, MAX_HERITAGES);
+  const h = [...heritages].sort().join(",");
   const categories: LiveSearchCategory[] = ["community", "events", "places", "food"];
 
-  // One search per category covering the chosen heritages together: every search
+  // Map data first: it needs no API key and cannot invent a place, so these lists fill even when AI search is unavailable.
+  const jobs: Job[] = (["food", "places", "community"] as const).map((category) => ({
+    key: `osm|${category}|${h}|${where}`,
+    category: category === "places" ? "places" : category,
+    heritages,
+    query: "",
+    source: "osm" as const,
+  }));
+
+  // One AI search per category covering the chosen heritages together: every search
   // spends API quota, so a profile costs a handful of searches, not dozens.
-  const jobs: Job[] = categories.map((category) => ({ key: `${category}|${[...heritages].sort().join(",")}|${where}`, category, heritages, query: "" }));
+  jobs.push(...categories.map((category) => ({ key: `${category}|${h}|${where}`, category, heritages, query: "", source: "ai" as const })));
 
   const profession = user.profession ? getProfession(user.profession) : undefined;
   if (profession) {
-    jobs.push({ key: `community|prof:${profession.id}|${[...heritages].sort().join(",")}|${where}`, category: "community", heritages, query: `${profession.label} professionals and students` });
-    jobs.push({ key: `events|prof:${profession.id}|${[...heritages].sort().join(",")}|${where}`, category: "events", heritages, query: `${profession.label} career panels, networking, and workshops` });
+    jobs.push({ key: `community|prof:${profession.id}|${h}|${where}`, category: "community", heritages, query: `${profession.label} professionals and students`, source: "ai" });
+    jobs.push({ key: `events|prof:${profession.id}|${h}|${where}`, category: "events", heritages, query: `${profession.label} career panels, networking, and workshops`, source: "ai" });
   }
   return jobs;
 }
 
+async function runOsmJob(job: Job, user: User): Promise<void> {
+  const res = await fetchOsmPlaces({
+    kind: job.category === "food" ? "food" : job.category === "community" ? "community" : "places",
+    heritages: job.heritages,
+    city: user.location.city,
+    state: user.location.state ?? "",
+    lat: user.location.lat,
+    lng: user.location.lng,
+  });
+  if (res.error && !res.results.length) return; // busy or unreachable: try again next time
+
+  const ctx: ConvertContext = { heritages: job.heritages, user };
+  if (job.category === "food") {
+    liveStore.merge("places", res.results.flatMap((r) => (r.kind === "place" ? [placeFromLive(r, "food", ctx)] : [])));
+  } else if (job.category === "places") {
+    liveStore.merge("places", res.results.flatMap((r) => (r.kind === "place" ? [placeFromLive(r, "cultural", ctx)] : [])));
+  } else {
+    liveStore.merge("communities", res.results.flatMap((r) => (r.kind === "community" ? [communityFromLive(r, ctx)] : [])).filter((c) => c !== null));
+  }
+  liveStore.markFetched(job.key, res.results.length ? 0 : TTL_MS - EMPTY_RETRY_MS);
+}
+
 async function runJob(job: Job, user: User): Promise<void> {
+  if (job.source === "osm") return runOsmJob(job, user);
   const res = await fetchLiveResults({
     category: job.category,
     query: job.query,

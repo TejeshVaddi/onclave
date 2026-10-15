@@ -67,17 +67,18 @@ export function placeFromLive(item: LivePlaceItem, kind: "food" | "cultural", ct
   const category = kind === "food" ? oneOf<FoodPlaceCategory>(item.category, FOOD_CATEGORIES, "restaurant") : oneOf<CulturalPlaceCategory>(item.category, CULTURAL_CATEGORIES, "cultural-center");
   const city = item.city || ctx.user.location.city;
   const state = item.state || ctx.user.location.state || "";
+  const heritages = item.heritages?.length ? item.heritages : ctx.heritages;
   return {
-    id: stableId("lp", item.name, item.externalUrl ?? ""),
+    id: stableId("lp", item.name, item.externalUrl ?? "", item.address, String(item.lat ?? "")),
     name: item.name,
     kind,
     category,
-    heritages: ctx.heritages,
+    heritages,
     description: item.description,
     address: item.address,
     city,
     state,
-    geo: geoFor(city, state, ctx.user),
+    geo: item.lat != null && item.lng != null ? { lat: item.lat, lng: item.lng } : geoFor(city, state, ctx.user),
     rating: item.rating,
     tags: item.tags,
     hours: item.hours,
@@ -129,16 +130,16 @@ function platformOf(raw: string): CommunityPlatform {
 export function communityFromLive(item: LiveCommunityItem, ctx: ConvertContext): Community | null {
   if (!item.externalUrl) return null;
   const [city, state] = item.locationLabel.split(",").map((s) => s.trim());
-  const g = !item.isOnline && city ? geocode({ city, state }) : undefined;
+  const g = !item.isOnline && city && item.lat == null ? geocode({ city, state }) : undefined;
   return {
     id: stableId("lc", item.name, item.externalUrl),
     name: item.name,
     platform: platformOf(item.platform),
     description: item.description,
     locationLabel: item.isOnline ? "Online" : item.locationLabel,
-    geo: g?.lat != null && g.lng != null ? { lat: g.lat, lng: g.lng } : undefined,
+    geo: item.lat != null && item.lng != null ? { lat: item.lat, lng: item.lng } : g?.lat != null && g.lng != null ? { lat: g.lat, lng: g.lng } : undefined,
     isOnline: item.isOnline,
-    heritages: ctx.heritages,
+    heritages: item.heritages?.length ? item.heritages : ctx.heritages,
     type: oneOf<CommunityType>(item.type, COMMUNITY_TYPES, "social"),
     tags: item.tags,
     externalUrl: item.externalUrl,

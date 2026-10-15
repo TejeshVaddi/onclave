@@ -69,6 +69,28 @@ export const PROFESSIONAL_ORGS: ProfessionalOrg[] = [
   { name: "National Education Association", url: "https://www.nea.org", blurb: "Resources and local affiliates for teachers and education professionals.", audience: "general", professions: ["education"] },
   { name: "Society of Professional Journalists", url: "https://www.spj.org", blurb: "Student and professional chapters with mentoring for journalists.", audience: "general", professions: ["arts-media"] },
   { name: "American Institute of Architects", url: "https://www.aia.org", blurb: "Local chapters and student programs for architects.", audience: "general", professions: ["architecture"] },
+  { name: "freeCodeCamp", url: "https://www.freecodecamp.org", blurb: "A free learning community with local study groups for people learning to code.", audience: "general", professions: ["software-engineering"] },
+  { name: "Kaggle", url: "https://www.kaggle.com", blurb: "A community of data scientists with courses, competitions, and forums.", audience: "general", professions: ["data-science"] },
+  { name: "Interaction Design Foundation", url: "https://www.interaction-design.org", blurb: "Courses and a global community for UX and product designers.", audience: "general", professions: ["product-design"] },
+  { name: "UXPA International", url: "https://uxpa.org", blurb: "A professional association for user experience practitioners, with local chapters.", audience: "general", professions: ["product-design"] },
+  { name: "Student Doctor Network", url: "https://studentdoctor.net", blurb: "A community where pre-med and medical students ask practicing doctors questions.", audience: "general", professions: ["medicine"] },
+  { name: "National Student Nurses' Association", url: "https://www.nsna.org", blurb: "A student association with local chapters for people becoming nurses.", audience: "general", professions: ["nursing"] },
+  { name: "American Association of Colleges of Nursing", url: "https://www.aacnnursing.org", blurb: "Guidance on nursing programs and careers.", audience: "general", professions: ["nursing"] },
+  { name: "Junior Achievement", url: "https://www.ja.org", blurb: "Mentoring in business and entrepreneurship through local volunteers.", audience: "general", professions: ["business"] },
+  { name: "CFA Institute", url: "https://www.cfainstitute.org", blurb: "A global association for investment professionals, with local societies.", audience: "general", professions: ["finance"] },
+  { name: "AICPA and CIMA", url: "https://www.aicpa-cima.com", blurb: "The professional body for accountants, with career resources for students.", audience: "general", professions: ["finance"] },
+  { name: "Law School Admission Council", url: "https://www.lsac.org", blurb: "Guidance and programs for people preparing for law school.", audience: "general", professions: ["law"] },
+  { name: "Equal Justice Works", url: "https://www.equaljusticeworks.org", blurb: "Fellowships and a network for lawyers working in public service.", audience: "general", professions: ["law", "public-policy"] },
+  { name: "APSIA", url: "https://www.apsia.org", blurb: "A network of graduate programs in international affairs and public policy.", audience: "general", professions: ["public-policy"] },
+  { name: "American Society for Public Administration", url: "https://www.aspanet.org", blurb: "A professional association for public service with local chapters.", audience: "general", professions: ["public-policy"] },
+  { name: "American Federation of Teachers", url: "https://www.aft.org", blurb: "A union and professional network for teachers and school staff.", audience: "general", professions: ["education"] },
+  { name: "Teach.org", url: "https://teach.org", blurb: "Advice and mentoring for people considering a teaching career.", audience: "general", professions: ["education"] },
+  { name: "Poynter Institute", url: "https://www.poynter.org", blurb: "Training and resources for journalists and media professionals.", audience: "general", professions: ["arts-media"] },
+  { name: "Online News Association", url: "https://journalists.org", blurb: "A community of digital journalists with student chapters.", audience: "general", professions: ["arts-media"] },
+  { name: "American Planning Association", url: "https://www.planning.org", blurb: "A professional association for urban planners with local chapters.", audience: "general", professions: ["architecture"] },
+  { name: "ACE Mentor Program", url: "https://www.acementor.org", blurb: "Mentoring for students interested in architecture, construction, and engineering.", audience: "general", professions: ["architecture", "engineering"] },
+  { name: "Council on Social Work Education", url: "https://www.cswe.org", blurb: "Guidance on social work programs and careers.", audience: "general", professions: ["social-work"] },
+  { name: "National Council of Nonprofits", url: "https://www.councilofnonprofits.org", blurb: "A network of state associations that connect people to nonprofit work.", audience: "general", professions: ["social-work"] },
 ];
 
 const AUDIENCE_BY_HERITAGE: Record<HeritageId, OrgAudience[]> = {
@@ -90,11 +112,15 @@ const AUDIENCE_BY_HERITAGE: Record<HeritageId, OrgAudience[]> = {
   "sri-lankan": ["asian", "south-asian"],
 };
 
-/** Orgs for a profession, those matching the person's background first, then general ones. */
+/**
+ * Orgs for a profession: those for the person's own background first, then ones open to everyone, and only
+ * then ones aimed at other communities, so there are always at least three when the field has them.
+ */
 export function orgsFor(profession: ProfessionId, heritages: HeritageId[], limit = 4): ProfessionalOrg[] {
   const wanted = new Set<OrgAudience>(heritages.flatMap((h) => AUDIENCE_BY_HERITAGE[h] ?? []));
   const forProfession = PROFESSIONAL_ORGS.filter((o) => o.professions.includes(profession));
   const matching = forProfession.filter((o) => wanted.has(o.audience));
   const general = forProfession.filter((o) => o.audience === "general");
-  return [...matching, ...general].slice(0, limit);
+  const other = forProfession.filter((o) => o.audience !== "general" && !wanted.has(o.audience));
+  return [...matching, ...general, ...other].slice(0, Math.max(limit, 3));
 }

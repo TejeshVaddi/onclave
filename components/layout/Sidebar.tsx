@@ -82,6 +82,7 @@ export function Sidebar() {
             <p className="truncate text-xs text-brown-muted">{formatLocation(user.location)}</p>
           </div>
         </Link>
+        <p className="mt-2 px-2 text-[10px] leading-snug text-brown-faint">Map data © OpenStreetMap contributors</p>
       </div>
     </aside>
   );

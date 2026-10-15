@@ -9,6 +9,7 @@ import { PersonProfileModal } from "@/components/profession/PersonProfileModal";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { SearchInput } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { SkeletonGrid } from "@/components/ui/Skeleton";
 import { liveStore } from "@/services/liveStore";
@@ -74,7 +75,9 @@ export function PeopleFinder() {
         }
       />
 
-      {!profession ? (
+      {!hydrated ? (
+        <SkeletonGrid count={3} />
+      ) : !profession ? (
         <EmptyState
           icon={<Briefcase className="h-6 w-6" aria-hidden />}
           title="Choose a field first"
@@ -141,18 +144,19 @@ export function PeopleFinder() {
             <section className="mt-10 border-t border-beige pt-6">
               <h2 className="text-xs font-bold uppercase tracking-wide text-brown-faint">Professional associations</h2>
               <p className="mt-1 text-sm text-brown-muted">Groups with local chapters and mentoring programs in {profession.label}.</p>
-              <ul className="mt-3 grid gap-2 sm:grid-cols-2">
+              <div className="mt-3 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                 {orgs.map((o) => (
-                  <li key={o.url}>
-                    <Button variant="outline" href={o.url} external className="h-auto w-full justify-between whitespace-normal py-3 text-left" iconRight={<ExternalLink className="h-4 w-4 shrink-0" aria-hidden />}>
-                      <span>
-                        <span className="block text-sm font-semibold text-brown">{o.name}</span>
-                        <span className="mt-0.5 block text-xs font-normal text-brown-muted">{o.blurb}</span>
-                      </span>
-                    </Button>
-                  </li>
+                  <Card key={o.url} as="article" pillar="profession" interactive className="flex flex-col">
+                    <h3 className="text-[15px] font-semibold leading-snug text-brown">{o.name}</h3>
+                    <p className="mt-2 flex-1 text-sm leading-relaxed text-brown-muted">{o.blurb}</p>
+                    <div className="mt-4 pt-1">
+                      <Button variant="outline" size="sm" href={o.url} external iconRight={<ExternalLink className="h-3.5 w-3.5" aria-hidden />}>
+                        Visit website
+                      </Button>
+                    </div>
+                  </Card>
                 ))}
-              </ul>
+              </div>
             </section>
           ) : null}
         </>

@@ -37,7 +37,16 @@ interface LiveItemBase {
   sourceTitle?: string;
 }
 
-export interface LiveCommunityItem extends LiveItemBase {
+/** Fields set when a result comes from a map database rather than a web page. */
+interface MapFields {
+  lat?: number;
+  lng?: number;
+  /** Heritages this entry matched, when more than one was searched together. */
+  heritages?: string[];
+  source?: "openstreetmap";
+}
+
+export interface LiveCommunityItem extends LiveItemBase, MapFields {
   kind: "community";
   platform: string;
   locationLabel: string;
@@ -45,7 +54,7 @@ export interface LiveCommunityItem extends LiveItemBase {
   type: string;
 }
 
-export interface LivePlaceItem extends LiveItemBase {
+export interface LivePlaceItem extends LiveItemBase, MapFields {
   kind: "place";
   category: string;
   address: string;
@@ -192,5 +201,20 @@ export interface PersonAssistResponse {
   sources?: LiveSource[];
   error?: string;
   /** Why each provider failed, for diagnosing configuration; not shown to people. */
+  detail?: string;
+}
+
+export interface OsmPlacesRequest {
+  kind: "food" | "places" | "community";
+  heritages: string[];
+  city: string;
+  state: string;
+  lat?: number;
+  lng?: number;
+}
+
+export interface OsmPlacesResponse {
+  results: (LivePlaceItem | LiveCommunityItem)[];
+  error?: string;
   detail?: string;
 }

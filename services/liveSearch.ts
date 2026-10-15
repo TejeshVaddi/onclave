@@ -1,4 +1,4 @@
-import type { LiveSearchCategory, LiveSearchResponse, PeopleSearchRequest, PeopleSearchResponse, PersonAssistResponse } from "./gemini/types";
+import type { LiveSearchCategory, LiveSearchResponse, OsmPlacesRequest, OsmPlacesResponse, PeopleSearchRequest, PeopleSearchResponse, PersonAssistResponse } from "./gemini/types";
 
 /**
  * Client-side entry point to the Gemini-backed live search. Calls the
@@ -43,4 +43,9 @@ export async function fetchPeople(params: PeopleSearchRequest): Promise<PeopleSe
 
 export async function fetchPersonAssist(body: unknown): Promise<PersonAssistResponse> {
   return (await postJson<PersonAssistResponse>("/api/person-assist", body)) ?? { configured: false };
+}
+
+/** Real places near a point from OpenStreetMap. Needs no API key. */
+export async function fetchOsmPlaces(params: OsmPlacesRequest): Promise<OsmPlacesResponse> {
+  return (await postJson<OsmPlacesResponse>("/api/osm-places", params)) ?? { results: [], error: "Couldn't reach the map data service." };
 }
