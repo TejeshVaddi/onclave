@@ -2,6 +2,7 @@ import type { HeritageId, User } from "@/types";
 import type { LiveSearchCategory } from "@/services/gemini/types";
 import { getProfession } from "@/data/professions";
 import { fetchLiveResults, fetchOsmPlaces, fetchPeople } from "@/services/liveSearch";
+import { searchOsmInBrowser } from "@/services/osmClient";
 import { liveStore } from "@/services/liveStore";
 import { communityFromLive, eventFromLive, mentorFromLive, placeFromLive, type ConvertContext } from "@/services/liveConvert";
 
@@ -54,25 +55,28 @@ function jobsFor(user: User): Job[] {
 }
 
 async function runOsmJob(job: Job, user: User): Promise<void> {
-  const res = await fetchOsmPlaces({
-    kind: job.category === "food" ? "food" : job.category === "community" ? "community" : "places",
-    heritages: job.heritages,
-    city: user.location.city,
-    state: user.location.state ?? "",
-    lat: user.location.lat,
-    lng: user.location.lng,
-  });
-  if (res.error && !res.results.length) return; // busy or unreachable: try again next time
+  const kind = job.category === "food" ? "food" : job.category === "community" ? "community" : "places";
+
+  // Ask the map servers from this browser first; fall back to asking through Onclave's server.
+  let results: Awaited<ReturnType<typeof searchOsmInBrowser>> = null;
+  if (user.location.lat != null && user.location.lng != null) {
+    results = await searchOsmInBrowser({ kind, heritages: job.heritages, lat: user.location.lat, lng: user.location.lng });
+  }
+  if (results === null) {
+    const res = await fetchOsmPlaces({ kind, heritages: job.heritages, city: user.location.city, state: user.location.state ?? "", lat: user.location.lat, lng: user.location.lng });
+    if (res.error && !res.results.length) return; // busy or unreachable: try again next time
+    results = res.results;
+  }
 
   const ctx: ConvertContext = { heritages: job.heritages, user };
   if (job.category === "food") {
-    liveStore.merge("places", res.results.flatMap((r) => (r.kind === "place" ? [placeFromLive(r, "food", ctx)] : [])));
+    liveStore.merge("places", results.flatMap((r) => (r.kind === "place" ? [placeFromLive(r, "food", ctx)] : [])));
   } else if (job.category === "places") {
-    liveStore.merge("places", res.results.flatMap((r) => (r.kind === "place" ? [placeFromLive(r, "cultural", ctx)] : [])));
+    liveStore.merge("places", results.flatMap((r) => (r.kind === "place" ? [placeFromLive(r, "cultural", ctx)] : [])));
   } else {
-    liveStore.merge("communities", res.results.flatMap((r) => (r.kind === "community" ? [communityFromLive(r, ctx)] : [])).filter((c) => c !== null));
+    liveStore.merge("communities", results.flatMap((r) => (r.kind === "community" ? [communityFromLive(r, ctx)] : [])).filter((c) => c !== null));
   }
-  liveStore.markFetched(job.key, res.results.length ? 0 : TTL_MS - EMPTY_RETRY_MS);
+  liveStore.markFetched(job.key, results.length ? 0 : TTL_MS - EMPTY_RETRY_MS);
 }
 
 async function runJob(job: Job, user: User): Promise<void> {

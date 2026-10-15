@@ -24,7 +24,17 @@ interface OpenRouterResponse {
   choices?: { message?: { content?: string; annotations?: OpenRouterAnnotation[] } }[];
 }
 
-export async function callOpenRouter(apiKey: string, prompt: string, opts: { web: boolean }): Promise<{ text: string; sources: LiveSource[]; model: string }> {
+export interface ChatTurn {
+  role: "system" | "user" | "assistant";
+  content: string;
+}
+
+/** A full conversation, with the web plugin optionally giving the model live search results to read. */
+export async function callOpenRouterChat(
+  apiKey: string,
+  messages: ChatTurn[],
+  opts: { web: boolean; maxTokens?: number },
+): Promise<{ text: string; sources: LiveSource[]; model: string }> {
   const model = process.env.OPENROUTER_MODEL?.trim() || DEFAULT_OPENROUTER_MODEL;
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
@@ -42,8 +52,8 @@ export async function callOpenRouter(apiKey: string, prompt: string, opts: { web
       signal: controller.signal,
       body: JSON.stringify({
         model,
-        messages: [{ role: "user", content: prompt }],
-        max_tokens: MAX_REPLY_TOKENS,
+        messages,
+        max_tokens: opts.maxTokens ?? MAX_REPLY_TOKENS,
         ...(opts.web ? { plugins: [{ id: "web", max_results: WEB_RESULTS }] } : {}),
       }),
     });
@@ -65,4 +75,9 @@ export async function callOpenRouter(apiKey: string, prompt: string, opts: { web
   // Citations are not returned for every model, so an empty list is not a failure:
   // whatever is claimed is checked against its own page before it is shown.
   return { text: message?.content ?? "", sources, model };
+}
+
+/** One prompt, one answer. */
+export async function callOpenRouter(apiKey: string, prompt: string, opts: { web: boolean }): Promise<{ text: string; sources: LiveSource[]; model: string }> {
+  return callOpenRouterChat(apiKey, [{ role: "user", content: prompt }], opts);
 }

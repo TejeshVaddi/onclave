@@ -119,21 +119,6 @@ export interface LiveSearchResponse {
 }
 
 /**
- * Response from /api/ai-generate: synthesizes ONE example when nothing real
- * matched in the local dataset or the live web search. Never claims to be a
- * verified, real listing — `provider` and `item` together let the UI label
- * it honestly ("AI-generated example, via Gemini/Groq — not verified").
- */
-export interface AiGenerateResponse {
-  /** False when neither GEMINI_API_KEY nor GROQ_API_KEY is set — callers should render nothing. */
-  configured: boolean;
-  generated: boolean;
-  item?: LiveResultItem;
-  provider?: "gemini" | "openrouter" | "groq";
-  error?: string;
-}
-
-/**
  * A real person found on a public page that shows they welcome questions or
  * offer mentoring. The server confirms the cited page names them and
  * connects them to their organization, and keeps a contact detail only if it
@@ -215,6 +200,36 @@ export interface OsmPlacesRequest {
 
 export interface OsmPlacesResponse {
   results: (LivePlaceItem | LiveCommunityItem)[];
+  error?: string;
+  detail?: string;
+}
+
+export interface DiscoverChatMessage {
+  role: "user" | "assistant";
+  content: string;
+}
+
+export interface DiscoverChatRequest {
+  messages: DiscoverChatMessage[];
+  profile: {
+    name: string;
+    heritages: string[];
+    professionLabel: string;
+    interests: string[];
+    city: string;
+    state: string;
+  };
+  /** Items from Onclave's own lists that were found for this question, each already confirmed to exist. */
+  verified: string[];
+}
+
+export interface DiscoverChatResponse {
+  configured: boolean;
+  reply?: string;
+  sources?: LiveSource[];
+  /** False when the answer was written without live web search results. */
+  webSearch?: boolean;
+  provider?: string;
   error?: string;
   detail?: string;
 }

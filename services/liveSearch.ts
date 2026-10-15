@@ -1,4 +1,4 @@
-import type { LiveSearchCategory, LiveSearchResponse, OsmPlacesRequest, OsmPlacesResponse, PeopleSearchRequest, PeopleSearchResponse, PersonAssistResponse } from "./gemini/types";
+import type { DiscoverChatRequest, DiscoverChatResponse, LiveSearchCategory, LiveSearchResponse, OsmPlacesRequest, OsmPlacesResponse, PeopleSearchRequest, PeopleSearchResponse, PersonAssistResponse } from "./gemini/types";
 
 /**
  * Client-side entry point to the Gemini-backed live search. Calls the
@@ -48,4 +48,15 @@ export async function fetchPersonAssist(body: unknown): Promise<PersonAssistResp
 /** Real places near a point from OpenStreetMap. Needs no API key. */
 export async function fetchOsmPlaces(params: OsmPlacesRequest): Promise<OsmPlacesResponse> {
   return (await postJson<OsmPlacesResponse>("/api/osm-places", params)) ?? { results: [], error: "Couldn't reach the map data service." };
+}
+
+/** One turn of the AI Discovery chat. */
+export async function fetchDiscoverChat(body: DiscoverChatRequest): Promise<DiscoverChatResponse> {
+  try {
+    const res = await fetch("/api/discover-chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    const data = (await res.json().catch(() => null)) as DiscoverChatResponse | null;
+    return data ?? { configured: false, error: "Couldn't reach the assistant." };
+  } catch {
+    return { configured: false, error: "Couldn't reach the assistant." };
+  }
 }

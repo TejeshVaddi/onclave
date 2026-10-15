@@ -9,7 +9,7 @@ import { matchesRecipe } from "./recipeService";
 import { matchesMentor } from "./mentorService";
 import { staticData } from "./dataSource";
 import { recommendForQuery, scoreCommunity, scoreEvent, scoreMentor, scorePlace, scoreRecipe } from "./recommendations";
-import { delay, uniq } from "@/lib/utils";
+import { uniq } from "@/lib/utils";
 import { hasWord, detectTimeframe } from "@/lib/nlp";
 
 /**
@@ -288,7 +288,6 @@ export function runDiscovery(intent: DiscoveryIntent, user: User, now = new Date
 /** Local provider: parses the query with rules and scores against the dataset. */
 export const localDiscoveryProvider: DiscoveryProvider = {
   async discover(query, user, scope = null) {
-    await delay(650); // simulate model latency so the UI's "thinking" state is visible
     const intent = interpretQuery(query, user, scope);
     return runDiscovery(intent, user);
   },

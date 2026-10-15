@@ -29,7 +29,7 @@ function ResultGroup({ icon: Icon, title, count, pillar, children }: { icon: typ
   );
 }
 
-export function DiscoveryResults({ result }: { result: DiscoveryResult }) {
+export function DiscoveryResults({ result, showNotes = true }: { result: DiscoveryResult; showNotes?: boolean }) {
   const { savedCommunityIds, savedRecipeIds, savedEventIds, toggleSavedCommunity, toggleSavedRecipe, toggleSavedEvent } = useAppState();
   const [activeEvent, setActiveEvent] = useState<CulturalEvent | null>(null);
   const [activeMentor, setActiveMentor] = useState<Mentor | null>(null);
@@ -46,7 +46,7 @@ export function DiscoveryResults({ result }: { result: DiscoveryResult }) {
 
   return (
     <div>
-      {result.notes.length > 0 ? (
+      {showNotes && result.notes.length > 0 ? (
         <div className="mb-6 space-y-2">
           {result.notes.map((note) => (
             <p key={note} className="flex items-start gap-2 rounded-xl bg-beige-soft/70 px-3.5 py-2.5 text-sm leading-relaxed text-brown-muted">

@@ -70,39 +70,6 @@ export function buildSearchPrompt(req: LiveSearchRequest, grounded: boolean, max
     .join("\n");
 }
 
-/**
- * Unlike buildSearchPrompt, this never claims the result is a real, existing
- * listing — it asks the model to synthesize one clearly-labeled example
- * (e.g. an original recipe, or a description of the kind of place someone
- * would look for) from its general knowledge. Only sensible for content
- * categories, not for claims about specific real-world entities: recipes are
- * fine (a recipe is a set of instructions, not a claim that a place exists),
- * but callers should still label generated output as an AI example, not a
- * verified listing.
- */
-export function buildGeneratePrompt(req: LiveSearchRequest): string {
-  const heritage = req.heritages.length ? heritageList(req.heritages.slice(0, 5).map((h) => clip(h, 40))) : null;
-  const query = clip(req.query, MAX_FIELD_LEN);
-  const heritageNote = heritage ? ` The person has ${heritage} heritage — lean on that cuisine/tradition if it's relevant and the query doesn't specify otherwise.` : "";
-
-  const instructionByCategory: Record<LiveSearchCategory, string> = {
-    recipe: `Write one original, authentic, respectful recipe for exactly what was asked: "${query}".${heritageNote} Use genuine culinary knowledge of the dish's real preparation — don't invent a fake variant. If "${query}" isn't a real, recognizable dish you have genuine knowledge of, say so by responding with exactly [] rather than inventing one.`,
-    community: `The person asked: "${query}". Don't invent a specific real group or claim one exists. Instead, describe in 1-2 sentences the KIND of community that would match this (e.g. "a Discord server or Facebook group for X"), and suggest a concrete, generic way to find one (a specific platform and search term). Respond as one item with an empty or generic "name" like "How to find this" and put the guidance in "description".`,
-    places: `The person asked: "${query}". Don't invent a specific real place or claim one exists. Instead, describe in 1-2 sentences what this kind of place typically is/looks like, and suggest a concrete way to find a real one nearby (e.g. what to search for). Respond as one item with a generic "name" like "How to find this" and put the guidance in "description".`,
-    food: `The person asked: "${query}". Don't invent a specific real restaurant/shop or claim one exists. Instead, describe in 1-2 sentences what to look for, and suggest a concrete way to find a real one nearby. Respond as one item with a generic "name" like "How to find this" and put the guidance in "description".`,
-    events: `The person asked: "${query}". Don't invent a specific real event, date, or venue. Instead, explain in 1-2 sentences what this occasion/celebration typically involves and when it's typically celebrated, and suggest a concrete way to find a real local one. Respond as one item with a generic "name" like "About this occasion" and put the explanation in "description".`,
-    mentorProgram: `The person asked: "${query}". Don't invent a specific real organization or claim one exists. Instead, describe in 1-2 sentences what kind of professional association or program would fit, and suggest a concrete way to search for a real one. Respond as one item with a generic "name" like "How to find this" and put the guidance in "description".`,
-  };
-
-  return [
-    instructionByCategory[req.category],
-    `Respond with ONLY a JSON array containing exactly one item (or [] if you genuinely can't help), no markdown fences, no commentary. The item must match this shape: ${SCHEMAS_BY_CATEGORY[req.category]}.`,
-    req.category === "recipe" ? `For the recipe, ALSO include: "ingredients": string[] (each a full ingredient line with quantity) and "steps": string[] (numbered-order instructions, each one sentence).` : "",
-  ]
-    .filter(Boolean)
-    .join("\n");
-}
-
 export const isNonEmptyString = (v: unknown): v is string => typeof v === "string" && v.trim().length > 0;
 export const asStringArray = (v: unknown, max = 8): string[] => (Array.isArray(v) ? v.filter(isNonEmptyString).slice(0, max) : []);
 
