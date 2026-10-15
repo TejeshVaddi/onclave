@@ -1,6 +1,6 @@
 import type { CulturalPlaceCategory, FoodPlaceCategory, GeoPoint, Place, PlaceCategory } from "@/types";
 import { dataSource } from "./dataSource";
-import { distanceMiles, mapsUrl } from "@/lib/geo";
+import { distanceMiles } from "@/lib/geo";
 import { searchWithBackfill, type BackfillResult } from "@/lib/backfill";
 
 export interface PlaceFilters {
@@ -76,6 +76,3 @@ export async function searchPlaces(filters: PlaceFilters = {}, minResults = 0): 
   return { items: withDist, exactCount, backfilled, outsideRadius };
 }
 
-export function placeMapUrl(p: Place): string {
-  return p.externalUrl ?? mapsUrl(`${p.name}, ${p.address}, ${p.city}, ${p.state}`);
-}

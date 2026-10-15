@@ -48,14 +48,3 @@ export async function getMentor(id: string): Promise<Mentor | undefined> {
   const all = await dataSource.getMentors();
   return all.find((m) => m.id === id);
 }
-
-export function availabilityLabel(a: Mentor["availability"]): string {
-  switch (a) {
-    case "open":
-      return "Accepting mentees";
-    case "limited":
-      return "Limited availability";
-    case "waitlist":
-      return "Waitlist";
-  }
-}

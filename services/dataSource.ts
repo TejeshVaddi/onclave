@@ -1,20 +1,12 @@
 import type { Community, CulturalEvent, Mentor, Place, Recipe } from "@/types";
-import { COMMUNITIES } from "@/data/communities";
 import { RECIPES } from "@/data/recipes";
-import { PLACES } from "@/data/places";
-import { EVENTS } from "@/data/events";
-import { MENTORS } from "@/data/mentors";
-import { delay } from "@/lib/utils";
+import { liveStore } from "@/services/liveStore";
 
 /**
  * DataSource is the single seam between the UI/services and where data comes
- * from. The MVP ships with `mockDataSource`, which reads the static datasets
- * in /data and simulates network latency so loading states are exercised.
- *
- * To connect real providers, implement this interface (for example
- * `apiDataSource` calling Reddit/Meetup, a recipe API, a Places API, and an
- * events API) and swap the export at the bottom of this file. No UI changes
- * are required.
+ * from. Communities, places, events, and people are real entries found by live
+ * search and confirmed to exist (see services/liveSearch, services/liveSync,
+ * services/llm/verify); recipes are Onclave's own written recipes.
  */
 export interface DataSource {
   getCommunities(): Promise<Community[]>;
@@ -24,40 +16,40 @@ export interface DataSource {
   getMentors(): Promise<Mentor[]>;
 }
 
-/** Simulated latency (ms) so the UI's loading states are visible in the demo. */
-const MOCK_LATENCY = 350;
-
-export const mockDataSource: DataSource = {
+export const liveDataSource: DataSource = {
   async getCommunities() {
-    await delay(MOCK_LATENCY);
-    return COMMUNITIES;
+    return liveStore.communities;
   },
   async getRecipes() {
-    await delay(MOCK_LATENCY);
     return RECIPES;
   },
   async getPlaces() {
-    await delay(MOCK_LATENCY);
-    return PLACES;
+    return liveStore.places;
   },
   async getEvents() {
-    await delay(MOCK_LATENCY);
-    return EVENTS;
+    return liveStore.events;
   },
   async getMentors() {
-    await delay(MOCK_LATENCY);
-    return MENTORS;
+    return liveStore.people;
   },
 };
 
-/** Synchronous access for the recommendation engine (no latency). */
+/** Synchronous access for the recommendation engine. Reads the live store each time. */
 export const staticData = {
-  communities: COMMUNITIES as Community[],
+  get communities(): Community[] {
+    return liveStore.communities;
+  },
   recipes: RECIPES,
-  places: PLACES,
-  events: EVENTS,
-  mentors: MENTORS,
+  get places(): Place[] {
+    return liveStore.places;
+  },
+  get events(): CulturalEvent[] {
+    return liveStore.events;
+  },
+  get mentors(): Mentor[] {
+    return liveStore.people;
+  },
 };
 
-/** The active data source. Swap this for an API-backed implementation. */
-export const dataSource: DataSource = mockDataSource;
+/** The active data source. */
+export const dataSource: DataSource = liveDataSource;

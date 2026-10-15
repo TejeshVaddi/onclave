@@ -4,6 +4,8 @@ import { useMemo, useState } from "react";
 import { CalendarDays } from "lucide-react";
 import { useAppState } from "@/components/providers/AppStateProvider";
 import { useToast } from "@/components/providers/ToastProvider";
+import { useLiveVersion } from "@/components/providers/LiveDataProvider";
+import { LiveStatus } from "@/components/ui/LiveStatus";
 import { useAsyncData, useDebouncedValue } from "@/lib/hooks";
 import { EventCard } from "@/components/cards/EventCard";
 import { EventDetailModal } from "./EventDetailModal";
@@ -13,7 +15,6 @@ import { Segmented } from "@/components/ui/Segmented";
 import { Button } from "@/components/ui/Button";
 import { SkeletonGrid } from "@/components/ui/Skeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { BackfillNote } from "@/components/ui/BackfillNote";
 import { DetectedSignals } from "@/components/ui/DetectedSignals";
 import { LiveResultsSection } from "@/components/ui/LiveResultsSection";
 import { EVENT_CATEGORIES, searchEvents } from "@/services/eventService";
@@ -24,6 +25,7 @@ import type { CulturalEvent, EventCategory, Timeframe } from "@/types";
 
 export function EventsList() {
   const { user, savedEventIds, toggleSavedEvent } = useAppState();
+  const live = useLiveVersion();
   const { toast } = useToast();
 
   const [query, setQuery] = useState("");
@@ -58,7 +60,7 @@ export function EventsList() {
     }),
     [debouncedQuery, queryHandledStructurally, effectiveHeritages, effectiveCategories, effectiveTimeframe, user.location.lat, user.location.lng],
   );
-  const { data, loading } = useAsyncData(() => searchEvents(filters, 5), JSON.stringify(filters), { keepPrevious: true });
+  const { data, loading } = useAsyncData(() => searchEvents(filters, 5), `${JSON.stringify(filters)}|${live}`, { keepPrevious: true });
   const events = data?.items ?? [];
 
   // Don't show a "This weekend" chip if the segmented control already
@@ -108,7 +110,8 @@ export function EventsList() {
 
       <p className="mt-5 text-sm text-brown-muted">{loading ? "Searching…" : `${events.length} upcoming events`}</p>
 
-      {!loading && data?.backfilled ? <BackfillNote exactCount={data.exactCount} outsideRadius={data.outsideRadius} className="mt-3" /> : null}
+
+      <LiveStatus noun="events" />
 
       <div className="mt-3">
         {loading ? (

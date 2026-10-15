@@ -119,20 +119,8 @@ export interface Community {
   tags: string[];
   /** Approximate size, for display only. */
   memberEstimate?: string;
-  /** Link to the community on its home platform. Onclave never hosts communities. Absent for demo listings with no verified page. */
-  externalUrl?: string;
-}
-
-/** Everything the "Learn more" panel shows beyond the card, keyed by community id in data/communityDetails. */
-export interface CommunityDetail {
-  /** Who the group is for. */
-  whoFor: string;
-  /** How often it meets or how active it is. */
-  cadence: string;
-  /** What members actually do together. */
-  activities: string[];
-  /** Concrete steps to join. */
-  howToJoin: string[];
+  /** Link to the community on its home platform. Onclave never hosts communities. */
+  externalUrl: string;
 }
 
 /* ------------------------------------------------------------------ */
@@ -218,7 +206,11 @@ export interface Place {
   reviewCount?: number;
   priceLevel?: 1 | 2 | 3 | 4;
   tags: string[];
-  /** Deep link to a map provider. Generated from the address when absent. */
+  /** Opening hours, only when the source states them. */
+  hours?: string;
+  /** What to order, see, or do there, as listed by the source. */
+  knownFor?: string[];
+  /** The place's own page, confirmed to exist. */
   externalUrl?: string;
   art: ArtTone;
   /**
@@ -228,20 +220,6 @@ export interface Place {
    * a real photo of a place that doesn't exist.
    */
   imageUrl?: string;
-}
-
-/** Everything the "Learn more" panel shows beyond the card, keyed by place id in data/placeDetails. */
-export interface PlaceDetail {
-  /** Typical opening hours, in plain words. */
-  hours: string;
-  /** What to order, see, or do there, most notable first. */
-  knownFor: string[];
-  /** Who or what it suits, e.g. "Families", "Late night". */
-  goodFor: string[];
-  /** Practical notes: parking, cash only, best time to go. */
-  visitTips: string[];
-  /** The place's own website, only when it is real and known. */
-  website?: string;
 }
 
 export type EventCategory =
@@ -270,36 +248,26 @@ export interface CulturalEvent {
   tags: string[];
   organizer: string;
   price: string;
+  /** Street address of the venue, when the source states it. */
+  address?: string;
+  /** Named performers, speakers, or hosts the source lists. */
+  performers?: string[];
+  /** Where and how to buy tickets or RSVP, in the source's terms. */
+  ticketInfo?: string;
+  /** The event's own page, confirmed to exist. */
   externalUrl?: string;
   art: ArtTone;
-}
-
-/** Everything the "Learn more" panel shows beyond the card, keyed by event id in data/eventDetails. */
-export interface EventDetail {
-  /** Street address of the venue, when known. */
-  address?: string;
-  /** Performers, speakers, hosts, or vendors, most prominent first. */
-  lineup: { name: string; role: string }[];
-  /** A rough run of show. */
-  schedule: { time: string; item: string }[];
-  /** A sentence or two on who is putting the event on. */
-  organizerNote?: string;
-  tickets: {
-    /** How people get in, in plain words. */
-    how: string;
-    /** Where tickets are sold or the RSVP lives, when one is needed. */
-    where?: string;
-  };
-  /** Practical notes: parking, ages, what to bring, accessibility. */
-  goodToKnow: string[];
-  /** The venue's own website, when we know the real one. */
-  venueUrl?: string;
 }
 
 /* ------------------------------------------------------------------ */
 /* Profession                                                          */
 /* ------------------------------------------------------------------ */
 
+/**
+ * A real professional found on a public page that shows they welcome
+ * questions or offer mentoring. Nothing here is guessed: contact details are
+ * included only when they appear on the cited page.
+ */
 export interface Mentor {
   id: string;
   name: string;
@@ -310,21 +278,41 @@ export interface Mentor {
   industry: string;
   profession: ProfessionId;
   heritages: HeritageId[];
-  /** How the mentor describes their background, e.g. "Chinese-American". */
+  /** Cultural background only when the source states it; empty otherwise. */
   heritageLabel: string;
   city: string;
   state: string;
   geo?: GeoPoint;
+  /** Not known for people found on the web; 0 hides it. */
   yearsExperience: number;
+  /** Plain-language summary of who they are and what they do. */
   bio: string;
   interests: InterestId[];
-  /** Topics the mentor can help with. */
+  /** Topics they can help with. */
   mentorsIn: string[];
-  /** One-sentence statement of who they are open to mentoring. */
+  /** What the source says about them welcoming questions or mentoring. */
   openTo: string;
   availability: "open" | "limited" | "waitlist";
   languages: string[];
   education?: string;
+  /** How their work lines up with the field the person is interested in. */
+  fieldFit?: string;
+  /** Cultural connection, only when the source states it. */
+  culturalFit?: string;
+  /** The page that describes them. */
+  evidenceUrl?: string;
+  /** Title of that page. */
+  sourceTitle?: string;
+  /** Ways to reach them, each confirmed to appear on the cited page. Shown as text, never as links. */
+  contacts?: PersonContacts;
+}
+
+export interface PersonContacts {
+  email?: string;
+  linkedin?: string;
+  website?: string;
+  /** Handle or address of another professional profile, e.g. "x.com/handle". */
+  social?: string[];
 }
 
 /* ------------------------------------------------------------------ */

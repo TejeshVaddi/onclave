@@ -11,7 +11,6 @@ import { Chip, ChipRow } from "@/components/ui/Chip";
 import { Button } from "@/components/ui/Button";
 import { SkeletonGrid } from "@/components/ui/Skeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { BackfillNote } from "@/components/ui/BackfillNote";
 import { DetectedSignals } from "@/components/ui/DetectedSignals";
 import { LiveResultsSection } from "@/components/ui/LiveResultsSection";
 import { DIFFICULTIES, searchRecipes, type RecipeFilters } from "@/services/recipeService";
@@ -75,7 +74,6 @@ export function RecipeFinder() {
 
       <p className="mt-5 text-sm text-brown-muted">{loading ? "Searching…" : `${recipes.length} recipes found`}</p>
 
-      {!loading && data?.backfilled ? <BackfillNote exactCount={data.exactCount} className="mt-3" /> : null}
 
       <div className="mt-3">
         {loading ? (

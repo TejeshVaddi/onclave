@@ -13,13 +13,13 @@ import { buildGeneratePrompt, buildSearchPrompt, extractJsonArray, toItem } from
  */
 const DEFAULT_MODEL = "openai/gpt-oss-120b";
 const REQUEST_TIMEOUT_MS = 30_000;
-const MAX_RESULTS = 8;
+const MAX_RESULTS = 12;
 
 interface GroqApiResponse {
   choices?: { message?: { content?: string } }[];
 }
 
-async function callGroq(apiKey: string, prompt: string): Promise<string> {
+export async function callGroq(apiKey: string, prompt: string): Promise<string> {
   const model = process.env.GROQ_MODEL?.trim() || DEFAULT_MODEL;
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);

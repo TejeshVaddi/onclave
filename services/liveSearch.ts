@@ -1,4 +1,4 @@
-import type { LiveSearchCategory, LiveSearchResponse } from "./gemini/types";
+import type { LiveSearchCategory, LiveSearchResponse, PeopleSearchRequest, PeopleSearchResponse, PersonAssistResponse } from "./gemini/types";
 
 /**
  * Client-side entry point to the Gemini-backed live search. Calls the
@@ -24,4 +24,23 @@ export async function fetchLiveResults(params: {
   } catch {
     return { configured: false, results: [] };
   }
+}
+
+async function postJson<T>(url: string, body: unknown): Promise<T | null> {
+  try {
+    const res = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    if (!res.ok) return null;
+    return (await res.json()) as T;
+  } catch {
+    return null;
+  }
+}
+
+/** Real people found on public pages that show they welcome questions. */
+export async function fetchPeople(params: PeopleSearchRequest): Promise<PeopleSearchResponse> {
+  return (await postJson<PeopleSearchResponse>("/api/people-search", params)) ?? { configured: false, people: [] };
+}
+
+export async function fetchPersonAssist(body: unknown): Promise<PersonAssistResponse> {
+  return (await postJson<PersonAssistResponse>("/api/person-assist", body)) ?? { configured: false };
 }

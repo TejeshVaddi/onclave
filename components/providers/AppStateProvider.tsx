@@ -5,18 +5,11 @@ import type { User } from "@/types";
 import { DEMO_USER } from "@/data/demoUser";
 import { clearStorage, readStorage, writeStorage } from "@/lib/storage";
 
-export interface ConnectionRequest {
-  mentorId: string;
-  message: string;
-  sentAt: string;
-}
-
 interface PersistedState {
   user: User;
   savedCommunityIds: string[];
   savedEventIds: string[];
   savedRecipeIds: string[];
-  connectionRequests: Record<string, ConnectionRequest>;
 }
 
 export interface AppState extends PersistedState {
@@ -26,8 +19,6 @@ export interface AppState extends PersistedState {
   toggleSavedCommunity: (id: string) => boolean;
   toggleSavedEvent: (id: string) => boolean;
   toggleSavedRecipe: (id: string) => boolean;
-  requestConnection: (mentorId: string, message: string) => void;
-  hasRequested: (mentorId: string) => boolean;
   resetDemo: () => void;
 }
 
@@ -38,7 +29,6 @@ const defaultPersisted: PersistedState = {
   savedCommunityIds: [],
   savedEventIds: [],
   savedRecipeIds: [],
-  connectionRequests: {},
 };
 
 const AppStateContext = createContext<AppState | null>(null);
@@ -102,17 +92,6 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     [state.savedRecipeIds],
   );
 
-  const requestConnection = useCallback((mentorId: string, message: string) => {
-    setState((s) => ({
-      ...s,
-      connectionRequests: {
-        ...s.connectionRequests,
-        [mentorId]: { mentorId, message, sentAt: new Date().toISOString() },
-      },
-    }));
-  }, []);
-
-  const hasRequested = useCallback((mentorId: string) => Boolean(state.connectionRequests[mentorId]), [state.connectionRequests]);
 
   const resetDemo = useCallback(() => {
     clearStorage();
@@ -127,11 +106,9 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       toggleSavedCommunity,
       toggleSavedEvent,
       toggleSavedRecipe,
-      requestConnection,
-      hasRequested,
       resetDemo,
     }),
-    [state, hydrated, updateUser, toggleSavedCommunity, toggleSavedEvent, toggleSavedRecipe, requestConnection, hasRequested, resetDemo],
+    [state, hydrated, updateUser, toggleSavedCommunity, toggleSavedEvent, toggleSavedRecipe, resetDemo],
   );
 
   return <AppStateContext.Provider value={value}>{children}</AppStateContext.Provider>;

@@ -5,16 +5,14 @@ import { AiGeneratedSection } from "@/components/ui/AiGeneratedSection";
 import type { DiscoveryResult, User } from "@/types";
 
 /**
- * Fires one Gemini live-search call per pillar the query actually asked
- * about (community, food, places, events, recipes, mentor programs), reusing
- * the same intent AI Discovery already parsed from the sentence. Each
- * section independently hides itself when there's nothing to show, so this
- * composes safely regardless of how many categories are relevant.
+ * Fires one live-search call per pillar the query actually asked about
+ * (community, food, places, events, recipes, mentor programs), reusing the
+ * same intent AI Discovery already parsed from the sentence. Every result has
+ * been confirmed to exist. Each section hides itself when there is nothing to
+ * show, so this composes safely regardless of how many categories are relevant.
  *
- * Below each live-search section, an AiGeneratedSection offers a synthesized
- * example (a full recipe; plain guidance for the others) — but only when
- * `matched` says the literal subject of the query wasn't found locally, so
- * it never appears as unnecessary noise next to a real match.
+ * Only recipes can be written by AI when none exists: a recipe is a set of
+ * instructions. Communities, places, events, and people are never invented.
  */
 export function DiscoveryLiveResults({ result, user }: { result: DiscoveryResult; user: User }) {
   const { intent, matched } = result;
@@ -28,25 +26,21 @@ export function DiscoveryLiveResults({ result, user }: { result: DiscoveryResult
       {intent.wantsCommunity ? (
         <>
           <LiveResultsSection category="community" query={query} heritages={heritages} city={city} state={state} />
-          <AiGeneratedSection category="community" query={query} heritages={heritages} city={city} state={state} enabled={matched.hasSubject && !matched.community} />
         </>
       ) : null}
       {intent.wantsFood ? (
         <>
           <LiveResultsSection category="food" query={query} heritages={heritages} city={city} state={state} />
-          <AiGeneratedSection category="food" query={query} heritages={heritages} city={city} state={state} enabled={matched.hasSubject && !matched.food} />
         </>
       ) : null}
       {intent.wantsPlaces ? (
         <>
           <LiveResultsSection category="places" query={query} heritages={heritages} city={city} state={state} />
-          <AiGeneratedSection category="places" query={query} heritages={heritages} city={city} state={state} enabled={matched.hasSubject && !matched.places} />
         </>
       ) : null}
       {intent.wantsEvents ? (
         <>
           <LiveResultsSection category="events" query={query} heritages={heritages} city={city} state={state} />
-          <AiGeneratedSection category="events" query={query} heritages={heritages} city={city} state={state} enabled={matched.hasSubject && !matched.events} />
         </>
       ) : null}
       {intent.wantsRecipes ? (
@@ -58,7 +52,6 @@ export function DiscoveryLiveResults({ result, user }: { result: DiscoveryResult
       {intent.wantsMentor ? (
         <>
           <LiveResultsSection category="mentorProgram" query={query} heritages={heritages} city={city} state={state} />
-          <AiGeneratedSection category="mentorProgram" query={query} heritages={heritages} city={city} state={state} enabled={matched.hasSubject && !matched.mentor} />
         </>
       ) : null}
     </div>

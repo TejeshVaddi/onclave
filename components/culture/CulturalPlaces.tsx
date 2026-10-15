@@ -3,6 +3,8 @@
 import { useMemo, useState } from "react";
 import { Landmark } from "lucide-react";
 import { useAppState } from "@/components/providers/AppStateProvider";
+import { useLiveVersion } from "@/components/providers/LiveDataProvider";
+import { LiveStatus } from "@/components/ui/LiveStatus";
 import { useAsyncData, useDebouncedValue } from "@/lib/hooks";
 import { PlaceCard } from "@/components/cards/PlaceCard";
 import { SearchInput } from "@/components/ui/Input";
@@ -10,7 +12,6 @@ import { Chip, ChipRow } from "@/components/ui/Chip";
 import { Button } from "@/components/ui/Button";
 import { SkeletonGrid } from "@/components/ui/Skeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { BackfillNote } from "@/components/ui/BackfillNote";
 import { DetectedSignals } from "@/components/ui/DetectedSignals";
 import { LiveResultsSection } from "@/components/ui/LiveResultsSection";
 import { CULTURAL_CATEGORIES, searchPlaces } from "@/services/placeService";
@@ -21,6 +22,7 @@ import type { CulturalPlaceCategory } from "@/types";
 
 export function CulturalPlaces() {
   const { user } = useAppState();
+  const live = useLiveVersion();
   const [query, setQuery] = useState("");
   const debouncedQuery = useDebouncedValue(query, 200);
   const [categories, setCategories] = useState<CulturalPlaceCategory[]>([]);
@@ -46,7 +48,7 @@ export function CulturalPlaces() {
     }),
     [debouncedQuery, queryHandledStructurally, effectiveHeritages, effectiveCategories, user.location.lat, user.location.lng],
   );
-  const { data, loading } = useAsyncData(() => searchPlaces(filters, 5), JSON.stringify(filters), { keepPrevious: true });
+  const { data, loading } = useAsyncData(() => searchPlaces(filters, 5), `${JSON.stringify(filters)}|${live}`, { keepPrevious: true });
   const places = data?.items ?? [];
 
   function clearAll() {
@@ -73,7 +75,8 @@ export function CulturalPlaces() {
 
       <p className="mt-5 text-sm text-brown-muted">{loading ? "Searching…" : `${places.length} places found`}</p>
 
-      {!loading && data?.backfilled ? <BackfillNote exactCount={data.exactCount} outsideRadius={data.outsideRadius} className="mt-3" /> : null}
+
+      <LiveStatus noun="cultural places" />
 
       <div className="mt-3">
         {loading ? (

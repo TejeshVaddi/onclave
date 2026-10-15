@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { MentorFinder } from "@/components/profession/MentorFinder";
+import { PeopleFinder } from "@/components/profession/PeopleFinder";
 
 export const metadata: Metadata = { title: "Profession" };
 
 export default function ProfessionPage() {
-  return <MentorFinder />;
+  return <PeopleFinder />;
 }

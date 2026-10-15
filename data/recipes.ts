@@ -7,7 +7,7 @@ import type { Recipe } from "@/types";
  * recipe. `sourceUrl` is null until a licensed recipe API is connected; the UI
  * then shows the source name and links out to it.
  */
-const DEMO_SOURCE = "Onclave demo kitchen";
+const DEMO_SOURCE = "Onclave kitchen";
 
 export const RECIPES: Recipe[] = [
   /* ---------------- Nigerian ---------------- */

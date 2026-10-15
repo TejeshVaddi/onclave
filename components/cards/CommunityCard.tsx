@@ -1,14 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { Bookmark, BookmarkCheck, Globe, MapPin } from "lucide-react";
+import { Bookmark, BookmarkCheck, ExternalLink, Globe, MapPin } from "lucide-react";
 import type { Community, RecommendationReason } from "@/types";
 import { Card } from "@/components/ui/Card";
 import { Badge, Tag } from "@/components/ui/Badge";
 import { MatchReasons } from "@/components/ui/MatchReasons";
 import { Button } from "@/components/ui/Button";
 import { CommunityDetailModal } from "@/components/community/CommunityDetailModal";
-import { CommunityLinkButton, hasDirectLink } from "@/components/community/CommunityLinkButton";
 import { communityTypeLabel, platformLabel } from "@/services/communityService";
 import { cn } from "@/lib/utils";
 
@@ -86,7 +85,9 @@ export function CommunityCard({ community: c, saved, onToggleSave, reasons, scor
         <Button variant="community" size="sm" onClick={() => setOpen(true)}>
           Learn More
         </Button>
-        {hasDirectLink(c) ? <CommunityLinkButton community={c} variant="outline" size="sm" /> : null}
+        <Button variant="outline" size="sm" href={c.externalUrl} external iconRight={<ExternalLink className="h-3.5 w-3.5" aria-hidden />}>
+          Visit community
+        </Button>
       </div>
       <CommunityDetailModal community={c} open={open} onClose={() => setOpen(false)} />
     </Card>

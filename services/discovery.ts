@@ -179,7 +179,7 @@ export function runDiscovery(intent: DiscoveryIntent, user: User, now = new Date
   const notes: string[] = [];
   const noteIfFallback = (wanted: boolean, matchedQuery: boolean, count: number, what: string) => {
     if (wanted && hasSubject && !matchedQuery && count > 0) {
-      notes.push(`No ${what} matching "${subjectLabel}" in the demo dataset yet — showing ${what} based on your profile instead.`);
+      notes.push(`No ${what} matching "${subjectLabel}" found yet, so these are ${what} based on your profile instead.`);
     }
   };
 

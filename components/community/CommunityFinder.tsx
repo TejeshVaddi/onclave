@@ -4,6 +4,8 @@ import { useMemo, useState } from "react";
 import { Users } from "lucide-react";
 import { useAppState } from "@/components/providers/AppStateProvider";
 import { useToast } from "@/components/providers/ToastProvider";
+import { useLiveVersion } from "@/components/providers/LiveDataProvider";
+import { LiveStatus } from "@/components/ui/LiveStatus";
 import { useAsyncData, useDebouncedValue } from "@/lib/hooks";
 import { CommunityCard } from "@/components/cards/CommunityCard";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -13,8 +15,6 @@ import { Button } from "@/components/ui/Button";
 import { Segmented } from "@/components/ui/Segmented";
 import { SkeletonGrid } from "@/components/ui/Skeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { DemoNote } from "@/components/ui/DemoNote";
-import { BackfillNote } from "@/components/ui/BackfillNote";
 import { DetectedSignals } from "@/components/ui/DetectedSignals";
 import { LiveResultsSection } from "@/components/ui/LiveResultsSection";
 import { COMMUNITY_TYPES, PLATFORMS, searchCommunities, type CommunityFilters } from "@/services/communityService";
@@ -25,6 +25,7 @@ import type { CommunityPlatform, CommunityType } from "@/types";
 
 export function CommunityFinder() {
   const { user, savedCommunityIds, toggleSavedCommunity } = useAppState();
+  const live = useLiveVersion();
   const { toast } = useToast();
 
   const [query, setQuery] = useState("");
@@ -64,7 +65,7 @@ export function CommunityFinder() {
     [debouncedQuery, queryHandledStructurally, effectiveHeritages, effectiveTypes, effectivePlatforms, locationMode, user.location.lat, user.location.lng],
   );
 
-  const key = JSON.stringify(filters);
+  const key = `${JSON.stringify(filters)}|${live}`;
   const { data, loading } = useAsyncData(() => searchCommunities(filters, 5), key, { keepPrevious: true });
   const communities = data?.items ?? [];
 
@@ -139,7 +140,8 @@ export function CommunityFinder() {
         <p className="text-sm text-brown-muted">{loading ? "Searching…" : `${communities.length} communities found`}</p>
       </div>
 
-      {!loading && data?.backfilled ? <BackfillNote exactCount={data.exactCount} outsideRadius={data.outsideRadius} className="mt-3" /> : null}
+
+      <LiveStatus noun="communities" />
 
       <div className="mt-3">
         {loading ? (
@@ -166,9 +168,6 @@ export function CommunityFinder() {
 
       <LiveResultsSection category="community" query={debouncedQuery} heritages={effectiveHeritages} city={user.location.city} state={user.location.state ?? ""} />
 
-      <DemoNote className="mt-6">
-        This is a curated demo dataset. A production version of Onclave would continuously discover and verify public communities via the Reddit, Meetup, Facebook Groups, and Discord APIs, replacing this list without any change to the page you&apos;re using.
-      </DemoNote>
     </div>
   );
 }

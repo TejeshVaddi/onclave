@@ -6,12 +6,9 @@ import type { Place } from "@/types";
 import { Modal } from "@/components/ui/Modal";
 import { Badge, Tag } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
-import { DemoNote } from "@/components/ui/DemoNote";
-import { PlaceLinkButton } from "@/components/culture/PlaceLinkButton";
 import { placeCategoryLabel } from "@/services/placeService";
-import { getPlaceDetail } from "@/data/placeDetails";
 import { heritageList } from "@/data/heritages";
-import { mapsUrl } from "@/lib/geo";
+import { directionsUrl } from "@/lib/geo";
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -22,23 +19,8 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
   );
 }
 
-function Bullets({ items }: { items: string[] }) {
-  return (
-    <ul className="space-y-1.5 text-sm text-brown">
-      {items.map((t) => (
-        <li key={t} className="flex gap-2">
-          <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-berry" aria-hidden />
-          {t}
-        </li>
-      ))}
-    </ul>
-  );
-}
-
 export function PlaceDetailModal({ place: p, open, onClose }: { place: Place; open: boolean; onClose: () => void }) {
-  const detail = getPlaceDetail(p.id);
-  const fullAddress = `${p.address}, ${p.city}, ${p.state}`;
-  const directions = mapsUrl(`${p.name}, ${fullAddress}`);
+  const fullAddress = [p.address, p.city, p.state].filter(Boolean).join(", ");
 
   return (
     <Modal
@@ -49,10 +31,14 @@ export function PlaceDetailModal({ place: p, open, onClose }: { place: Place; op
       description={fullAddress}
       footer={
         <>
-          <Button variant="outline" href={directions} external iconRight={<ExternalLink className="h-4 w-4" aria-hidden />}>
+          <Button variant="outline" href={directionsUrl(`${p.name}, ${fullAddress}`)} external iconRight={<ExternalLink className="h-4 w-4" aria-hidden />}>
             Directions
           </Button>
-          <PlaceLinkButton place={p} website={detail?.website} />
+          {p.externalUrl ? (
+            <Button variant="culture" href={p.externalUrl} external iconRight={<ExternalLink className="h-4 w-4" aria-hidden />}>
+              Website
+            </Button>
+          ) : null}
         </>
       }
     >
@@ -73,40 +59,35 @@ export function PlaceDetailModal({ place: p, open, onClose }: { place: Place; op
         <p className="flex items-start gap-2">
           <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-berry" aria-hidden /> {fullAddress}
         </p>
-        {detail ? (
+        {p.hours ? (
           <p className="flex items-start gap-2">
-            <Clock className="mt-0.5 h-4 w-4 shrink-0 text-berry" aria-hidden /> {detail.hours}
+            <Clock className="mt-0.5 h-4 w-4 shrink-0 text-berry" aria-hidden /> {p.hours}
           </p>
         ) : null}
       </div>
 
       <p className="mt-4 text-sm leading-relaxed text-brown-muted">{p.description}</p>
 
-      {detail?.knownFor.length ? (
+      {p.knownFor?.length ? (
         <Section title={p.kind === "food" ? "What to order" : "What you'll find"}>
-          <Bullets items={detail.knownFor} />
-        </Section>
-      ) : null}
-
-      {detail?.goodFor.length ? (
-        <Section title="Good for">
-          <div className="flex flex-wrap gap-1.5">
-            {detail.goodFor.map((g) => (
-              <Tag key={g}>{g}</Tag>
+          <ul className="space-y-1.5 text-sm text-brown">
+            {p.knownFor.map((t) => (
+              <li key={t} className="flex gap-2">
+                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-berry" aria-hidden />
+                {t}
+              </li>
             ))}
-          </div>
+          </ul>
         </Section>
       ) : null}
 
-      {detail?.visitTips.length ? (
-        <Section title="Before you go">
-          <Bullets items={detail.visitTips} />
-        </Section>
+      {p.tags.length ? (
+        <div className="mt-5 flex flex-wrap gap-1.5">
+          {p.tags.map((t) => (
+            <Tag key={t}>{t}</Tag>
+          ))}
+        </div>
       ) : null}
-
-      <DemoNote className="mt-5">
-        This is a demo listing. Hours and highlights are typical examples, so confirm with the place before you go.
-      </DemoNote>
     </Modal>
   );
 }

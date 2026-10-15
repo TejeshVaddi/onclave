@@ -28,7 +28,7 @@ export function formatDistance(miles: number): string {
   return `${Math.round(miles)} mi`;
 }
 
-/** Build a maps deep link for an address. Works without any API key. */
-export function mapsUrl(query: string): string {
-  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+/** Turn-by-turn directions to an address, opened in the maps app or site. Works without any API key. */
+export function directionsUrl(destination: string): string {
+  return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destination)}`;
 }

@@ -6,7 +6,6 @@ import type { Community, CulturalEvent, Mentor, Place, Recipe, Recommendation } 
 import { MatchReasons } from "@/components/ui/MatchReasons";
 import { PILLARS } from "@/lib/pillars";
 import { formatEventDate } from "@/lib/format";
-import { placeMapUrl } from "@/services/placeService";
 import { cn } from "@/lib/utils";
 
 const KIND_META = {
@@ -15,14 +14,14 @@ const KIND_META = {
   "food-place": { label: "Food near you", icon: MapPin },
   "cultural-place": { label: "Cultural place", icon: Landmark },
   event: { label: "Event", icon: CalendarDays },
-  mentor: { label: "Mentor", icon: Briefcase },
+  mentor: { label: "Person", icon: Briefcase },
 } as const;
 
 function describe(rec: Recommendation): { title: string; subtitle: string; href: string; external: boolean; cta: string } {
   switch (rec.kind) {
     case "community": {
       const c = rec.item as Community;
-      return { title: c.name, subtitle: `${c.locationLabel} · ${c.tags.slice(0, 2).join(", ")}`, href: "/community", external: false, cta: "Explore communities" };
+      return { title: c.name, subtitle: `${c.locationLabel} · ${c.tags.slice(0, 2).join(", ")}`, href: c.externalUrl, external: true, cta: "Visit community" };
     }
     case "recipe": {
       const r = rec.item as Recipe;
@@ -31,15 +30,20 @@ function describe(rec: Recommendation): { title: string; subtitle: string; href:
     case "food-place":
     case "cultural-place": {
       const p = rec.item as Place;
-      return { title: p.name, subtitle: `${p.city}, ${p.state} · ${p.description}`, href: placeMapUrl(p), external: true, cta: "View location" };
+      return p.externalUrl
+        ? { title: p.name, subtitle: `${p.city}, ${p.state} · ${p.description}`, href: p.externalUrl, external: true, cta: "Visit website" }
+        : { title: p.name, subtitle: `${p.city}, ${p.state} · ${p.description}`, href: `/culture?tab=${p.kind === "food" ? "food" : "places"}`, external: false, cta: "See places" };
     }
     case "event": {
       const e = rec.item as CulturalEvent;
-      return { title: e.name, subtitle: `${formatEventDate(e.date, { weekday: true })} · ${e.isVirtual ? "Online" : `${e.city}, ${e.state}`}`, href: "/culture?tab=events", external: false, cta: "See events" };
+      const subtitle = `${formatEventDate(e.date, { weekday: true })} · ${e.isVirtual ? "Online" : [e.city, e.state].filter(Boolean).join(", ")}`;
+      return e.externalUrl
+        ? { title: e.name, subtitle, href: e.externalUrl, external: true, cta: "Event page" }
+        : { title: e.name, subtitle, href: "/culture?tab=events", external: false, cta: "See events" };
     }
     case "mentor": {
       const m = rec.item as Mentor;
-      return { title: m.name, subtitle: `${m.title} at ${m.company} · ${m.heritageLabel}`, href: `/profession/${m.id}`, external: false, cta: "View profile" };
+      return { title: m.name, subtitle: `${m.title} at ${m.company}`, href: "/profession", external: false, cta: "See people" };
     }
   }
 }

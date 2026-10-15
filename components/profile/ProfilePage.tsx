@@ -17,6 +17,7 @@ import { RecipeCard } from "@/components/cards/RecipeCard";
 import { EventCard } from "@/components/cards/EventCard";
 import { EventDetailModal } from "@/components/culture/EventDetailModal";
 import { staticData } from "@/services/dataSource";
+import { useLiveVersion } from "@/components/providers/LiveDataProvider";
 import { heritageList } from "@/data/heritages";
 import { interestLabel } from "@/data/interests";
 import { professionLabel } from "@/data/professions";
@@ -39,9 +40,11 @@ export function ProfilePage() {
     router.push("/onboarding");
   }
 
-  const savedCommunities = useMemo(() => staticData.communities.filter((c) => savedCommunityIds.includes(c.id)), [savedCommunityIds]);
+  const live = useLiveVersion();
+  // `live` changes whenever the live store gains entries, which the memo must follow.
+  const savedCommunities = useMemo(() => (live >= 0 ? staticData.communities : []).filter((c) => savedCommunityIds.includes(c.id)), [savedCommunityIds, live]);
   const savedRecipes = useMemo(() => staticData.recipes.filter((r) => savedRecipeIds.includes(r.id)), [savedRecipeIds]);
-  const savedEvents = useMemo(() => staticData.events.filter((e) => savedEventIds.includes(e.id)), [savedEventIds]);
+  const savedEvents = useMemo(() => (live >= 0 ? staticData.events : []).filter((e) => savedEventIds.includes(e.id)), [savedEventIds, live]);
 
   return (
     <div className="animate-fade-up">

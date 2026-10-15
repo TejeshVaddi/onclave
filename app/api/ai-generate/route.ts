@@ -2,7 +2,8 @@ import { generateWithGemini } from "@/services/gemini/client";
 import { generateWithGroq } from "@/services/groq/client";
 import type { AiGenerateResponse, LiveSearchCategory, LiveSearchRequest } from "@/services/gemini/types";
 
-const CATEGORIES: LiveSearchCategory[] = ["community", "food", "places", "events", "recipe", "mentorProgram"];
+// Only recipes are ever written by AI; real communities, places, events, and people must come from search.
+const CATEGORIES: LiveSearchCategory[] = ["recipe"];
 
 function isValidBody(body: unknown): body is LiveSearchRequest {
   if (typeof body !== "object" || body === null) return false;

@@ -4,14 +4,13 @@ import { useState } from "react";
 import { Briefcase, CalendarDays, ChefHat, Info, Landmark, MapPin, Users } from "lucide-react";
 import type { DiscoveryResult } from "@/types";
 import { useAppState } from "@/components/providers/AppStateProvider";
-import { useToast } from "@/components/providers/ToastProvider";
 import { CommunityCard } from "@/components/cards/CommunityCard";
 import { RecipeCard } from "@/components/cards/RecipeCard";
 import { PlaceCard } from "@/components/cards/PlaceCard";
 import { EventCard } from "@/components/cards/EventCard";
-import { MentorCard } from "@/components/cards/MentorCard";
+import { PersonCard } from "@/components/cards/PersonCard";
 import { EventDetailModal } from "@/components/culture/EventDetailModal";
-import { ConnectionRequestModal } from "@/components/profession/ConnectionRequestModal";
+import { PersonProfileModal } from "@/components/profession/PersonProfileModal";
 import { EmptyState } from "@/components/ui/EmptyState";
 import type { CulturalEvent, Mentor } from "@/types";
 
@@ -31,16 +30,9 @@ function ResultGroup({ icon: Icon, title, count, pillar, children }: { icon: typ
 }
 
 export function DiscoveryResults({ result }: { result: DiscoveryResult }) {
-  const { savedCommunityIds, savedRecipeIds, savedEventIds, toggleSavedCommunity, toggleSavedRecipe, toggleSavedEvent, hasRequested, requestConnection } = useAppState();
-  const { toast } = useToast();
+  const { savedCommunityIds, savedRecipeIds, savedEventIds, toggleSavedCommunity, toggleSavedRecipe, toggleSavedEvent } = useAppState();
   const [activeEvent, setActiveEvent] = useState<CulturalEvent | null>(null);
   const [activeMentor, setActiveMentor] = useState<Mentor | null>(null);
-
-  function handleSend(mentorId: string, message: string) {
-    requestConnection(mentorId, message);
-    toast({ title: "Request saved", description: "Mentors here are example profiles, so nothing was sent.", pillar: "profession" });
-    setActiveMentor(null);
-  }
 
   if (result.totalResults === 0) {
     return (
@@ -99,14 +91,14 @@ export function DiscoveryResults({ result }: { result: DiscoveryResult }) {
         ))}
       </ResultGroup>
 
-      <ResultGroup icon={Briefcase} title="Profession · Mentors" count={result.profession.length} pillar="profession">
+      <ResultGroup icon={Briefcase} title="Profession · People" count={result.profession.length} pillar="profession">
         {result.profession.map((r) => (
-          <MentorCard key={r.id} mentor={r.item} requested={hasRequested(r.item.id)} onRequest={setActiveMentor} reasons={r.reasons} score={r.score} />
+          <PersonCard key={r.id} person={r.item} onView={setActiveMentor} reasons={r.reasons} score={r.score} />
         ))}
       </ResultGroup>
 
       <EventDetailModal event={activeEvent} open={!!activeEvent} onClose={() => setActiveEvent(null)} saved={activeEvent ? savedEventIds.includes(activeEvent.id) : false} onToggleSave={toggleSavedEvent} />
-      <ConnectionRequestModal mentor={activeMentor} open={!!activeMentor} onClose={() => setActiveMentor(null)} onSend={handleSend} />
+      <PersonProfileModal person={activeMentor} open={!!activeMentor} onClose={() => setActiveMentor(null)} />
     </div>
   );
 }

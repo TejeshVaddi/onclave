@@ -19,7 +19,8 @@ const DEFAULT_MODEL = "gemini-3.6-flash";
 // Gemini 3.x models reason internally before answering, which runs longer
 // without search grounding to lean on, so this needs real headroom.
 const REQUEST_TIMEOUT_MS = 60_000;
-const MAX_RESULTS = 8;
+/** Candidates asked of the model; fewer survive the existence check. */
+const MAX_RESULTS = 12;
 
 interface GeminiApiPart {
   text?: string;
@@ -34,8 +35,8 @@ interface GeminiApiResponse {
   }[];
 }
 
-async function callGemini(apiKey: string, prompt: string, withGrounding: boolean): Promise<{ text: string; sources: LiveSource[] }> {
-  const model = process.env.GEMINI_MODEL?.trim() || DEFAULT_MODEL;
+export async function callGemini(apiKey: string, prompt: string, withGrounding: boolean, modelOverride?: string): Promise<{ text: string; sources: LiveSource[] }> {
+  const model = modelOverride || process.env.GEMINI_MODEL?.trim() || DEFAULT_MODEL;
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`;
 
   const controller = new AbortController();
@@ -72,17 +73,51 @@ async function callGemini(apiKey: string, prompt: string, withGrounding: boolean
   return { text, sources };
 }
 
+/**
+ * Models to try for Google Search grounding, in order. Which models may use
+ * grounding differs by account and plan, so when the configured model is
+ * refused, the next one is tried before giving up on live web search.
+ */
+const GROUNDING_MODELS = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-2.5-flash-lite"];
+
+export interface GroundedCall {
+  text: string;
+  sources: LiveSource[];
+  model: string;
+}
+
+/** A grounded call that walks the model list. Throws only if every model refused, with each reason. */
+export async function callGeminiGrounded(apiKey: string, prompt: string): Promise<GroundedCall> {
+  const configured = process.env.GEMINI_MODEL?.trim() || DEFAULT_MODEL;
+  const models = [configured, ...GROUNDING_MODELS.filter((m) => m !== configured)];
+  const failures: string[] = [];
+  for (const model of models) {
+    try {
+      const { text, sources } = await callGemini(apiKey, prompt, true, model);
+      return { text, sources, model };
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      failures.push(`${model}: ${msg.replace(/\s+/g, " ").slice(0, 160)}`);
+      // A rejected key will not work on any model.
+      if (/ 40[13] /.test(msg) || /API key not valid|UNAUTHENTICATED/i.test(msg)) break;
+    }
+  }
+  throw new Error(`Grounded search unavailable. ${failures.join(" | ")}`);
+}
+
 export async function runGeminiSearch(
   apiKey: string,
   req: LiveSearchRequest,
-): Promise<{ results: LiveResultItem[]; sources: LiveSource[]; grounded: boolean }> {
+): Promise<{ results: LiveResultItem[]; sources: LiveSource[]; grounded: boolean; groundingNote?: string }> {
   let grounded = true;
+  let groundingNote: string | undefined;
   let text: string;
   let sources: LiveSource[];
 
   try {
-    ({ text, sources } = await callGemini(apiKey, buildSearchPrompt(req, true, MAX_RESULTS), true));
+    ({ text, sources } = await callGeminiGrounded(apiKey, buildSearchPrompt(req, true, MAX_RESULTS)));
   } catch (err) {
+    groundingNote = err instanceof Error ? err.message : String(err);
     // Grounding can be gated by quota/billing separately from plain
     // generation on some accounts. Fall back once to ungrounded generation
     // rather than surfacing nothing — the response is clearly marked
@@ -97,7 +132,7 @@ export async function runGeminiSearch(
     .map((item) => toItem(item, req.category))
     .filter((item): item is LiveResultItem => item !== null)
     .slice(0, MAX_RESULTS);
-  return { results, sources: sources.slice(0, 8), grounded };
+  return { results, sources: sources.slice(0, 12), grounded, groundingNote };
 }
 
 /**

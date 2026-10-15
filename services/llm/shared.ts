@@ -17,16 +17,16 @@ export function clip(s: string, max = MAX_FIELD_LEN): string {
 
 export const SCHEMAS_BY_CATEGORY: Record<LiveSearchCategory, string> = {
   community:
-    '{"name": string, "platform": string (e.g. "Reddit", "Facebook", "Meetup", "Discord", "Website"), "description": string (1-2 sentences), "locationLabel": string, "isOnline": boolean, "type": one of "social"|"student"|"professional"|"cultural"|"religious"|"local", "tags": string[], "externalUrl": string (optional — include it if you know the real URL, but omit it rather than guessing; a real name is still useful without one)}',
-  food: '{"name": string, "category": one of "restaurant"|"grocery"|"market"|"bakery"|"cafe", "description": string (1-2 sentences), "address": string, "city": string, "state": string, "rating": number (optional, 1-5), "tags": string[], "externalUrl": string (optional, the business website or map link)}',
+    '{"name": string, "platform": string (e.g. "Reddit", "Facebook", "Meetup", "Discord", "Website"), "description": string (1-2 sentences), "locationLabel": string, "isOnline": boolean, "type": one of "social"|"student"|"professional"|"cultural"|"religious"|"local", "tags": string[], "externalUrl": string (required: the page of the community itself, such as its subreddit, group page, website, or club page. Results without a real page are discarded)}',
+  food: '{"name": string, "category": one of "restaurant"|"grocery"|"market"|"bakery"|"cafe", "description": string (1-2 sentences), "address": string, "city": string, "state": string, "rating": number (optional, 1-5), "hours": string (optional, only if the source states them), "knownFor": string[] (optional, dishes or products the source highlights), "tags": string[], "externalUrl": string (required: the website of the business itself, or its page on a directory. Results without a real page are discarded)}',
   places:
-    '{"name": string, "category": one of "temple"|"mosque"|"church"|"cultural-center"|"museum"|"heritage-site"|"community-center", "description": string (1-2 sentences), "address": string, "city": string, "state": string, "rating": number (optional, 1-5), "tags": string[], "externalUrl": string (optional)}',
+    '{"name": string, "category": one of "temple"|"mosque"|"church"|"cultural-center"|"museum"|"heritage-site"|"community-center", "description": string (1-2 sentences), "address": string, "city": string, "state": string, "rating": number (optional, 1-5), "hours": string (optional, only if the source states them), "knownFor": string[] (optional, what the source says to see or do), "tags": string[], "externalUrl": string (required: the website of the place itself. Results without a real page are discarded)}',
   events:
-    '{"name": string, "date": string (ISO YYYY-MM-DD if known, else omit), "venue": string, "city": string, "state": string, "description": string (1-2 sentences), "category": one of "festival"|"religious"|"community"|"workshop"|"performance"|"food", "organizer": string (optional, the group or venue putting it on), "price": string (optional, e.g. "Free" or "$10"), "address": string (optional, the venue street address), "performers": string[] (optional, named performers, speakers, or hosts, only if the source lists them), "ticketInfo": string (optional, where and how to buy tickets or RSVP), "tags": string[], "externalUrl": string (optional, the official event or ticket page, only if real)}',
+    '{"name": string, "date": string (ISO YYYY-MM-DD, required and not in the past), "time": string (optional, as listed), "venue": string, "city": string, "state": string, "description": string (1-2 sentences), "category": one of "festival"|"religious"|"community"|"workshop"|"performance"|"food", "organizer": string (optional, the group or venue putting it on), "price": string (optional, e.g. "Free" or "$10"), "address": string (optional, the venue street address), "performers": string[] (optional, named performers, speakers, or hosts, only if the source lists them), "ticketInfo": string (optional, where and how to buy tickets or RSVP), "tags": string[], "externalUrl": string (required: the page of the event itself, or its ticket page. Results without a real page are discarded)}',
   recipe:
-    '{"name": string, "sourceName": string (the publisher/website name, e.g. "Serious Eats"), "description": string (1-2 sentences, original wording, not copied from the source), "difficulty": one of "easy"|"medium"|"hard", "timeMinutes": number, "tags": string[], "externalUrl": string (optional — include it if you know the real recipe page URL, but omit it rather than guessing; the dish name and source website are still useful without one)}',
+    '{"name": string, "sourceName": string (the publisher/website name, e.g. "Serious Eats"), "description": string (1-2 sentences, original wording, not copied from the source), "difficulty": one of "easy"|"medium"|"hard", "timeMinutes": number, "tags": string[], "externalUrl": string (required: the recipe page itself. Results without a real page are discarded)}',
   mentorProgram:
-    '{"name": string, "organizationType": string (e.g. "Professional association", "Mentorship program", "Student chapter"), "description": string (1-2 sentences), "locationLabel": string, "tags": string[], "externalUrl": string (optional — include it if you know the real URL, but omit it rather than guessing)}',
+    '{"name": string, "organizationType": string (e.g. "Professional association", "Mentorship program", "Student chapter"), "description": string (1-2 sentences), "locationLabel": string, "tags": string[], "externalUrl": string (required: the website of the organization itself. Results without a real page are discarded)}',
 };
 
 const SEARCH_SUBJECT_BY_CATEGORY: Record<LiveSearchCategory, (who: string) => string> = {
@@ -51,11 +51,13 @@ export function buildSearchPrompt(req: LiveSearchRequest, grounded: boolean, max
     ? [
         `Search the web and find up to ${maxResults} ${SEARCH_SUBJECT_BY_CATEGORY[req.category](who)} ${place}.`,
         `Only include real, verifiable ones you can find current information about. If you find fewer than ${maxResults}, or none at all, that's fine — do not invent or guess ones you're not confident about.`,
+        `Every result must carry the real URL of its own page, copied from a page you actually found. Never construct, shorten, or guess a URL. A server will open each URL and discard any result whose page does not exist or does not name it.`,
+        req.category === "events" ? `Only include events that have not happened yet, with the exact date taken from the event's page.` : "",
       ]
     : [
         `You do not have live web access right now. From your own trained knowledge, name up to ${maxResults} ${SEARCH_SUBJECT_BY_CATEGORY[req.category](who)} ${place}.`,
         `Be conservative about the NAME: only include ones you are genuinely confident actually exist. It is much better to return fewer results, or none, than to invent a plausible-sounding but fake one.`,
-        `The URL is a separate, lower bar: include it only if you actually know the real one, but not knowing an exact URL is not a reason to drop an otherwise-confident result — just omit that field.`,
+        `Every result needs the real URL of its own page; a server will open each URL and discard any result whose page does not exist or does not name it, so leave out anything whose URL you are not sure of.`,
       ];
 
   return [
@@ -179,6 +181,8 @@ export function toItem(raw: unknown, category: LiveSearchCategory): LiveResultIt
         city: r.city,
         state: isNonEmptyString(r.state) ? r.state : "",
         rating: typeof r.rating === "number" && r.rating > 0 && r.rating <= 5 ? r.rating : undefined,
+        hours: isNonEmptyString(r.hours) ? r.hours : undefined,
+        knownFor: asStringArray(r.knownFor, 6),
         tags,
         externalUrl,
       };
@@ -189,6 +193,7 @@ export function toItem(raw: unknown, category: LiveSearchCategory): LiveResultIt
         name: r.name,
         description: r.description,
         date: isNonEmptyString(r.date) && /^\d{4}-\d{2}-\d{2}$/.test(r.date) ? r.date : undefined,
+        time: isNonEmptyString(r.time) ? r.time : undefined,
         venue: r.venue,
         city: isNonEmptyString(r.city) ? r.city : "",
         state: isNonEmptyString(r.state) ? r.state : "",

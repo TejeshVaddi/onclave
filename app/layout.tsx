@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { AppStateProvider } from "@/components/providers/AppStateProvider";
+import { LiveDataProvider } from "@/components/providers/LiveDataProvider";
 import { ToastProvider } from "@/components/providers/ToastProvider";
 import { AppShell } from "@/components/layout/AppShell";
 
@@ -34,9 +35,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html lang="en" className={`${inter.variable} h-full antialiased`}>
       <body className="min-h-full bg-cream text-brown">
         <AppStateProvider>
-          <ToastProvider>
-            <AppShell>{children}</AppShell>
-          </ToastProvider>
+          <LiveDataProvider>
+            <ToastProvider>
+              <AppShell>{children}</AppShell>
+            </ToastProvider>
+          </LiveDataProvider>
         </AppStateProvider>
       </body>
     </html>

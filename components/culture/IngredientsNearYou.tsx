@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import { ShoppingBasket } from "lucide-react";
 import { useUser } from "@/components/providers/AppStateProvider";
+import { useLiveVersion } from "@/components/providers/LiveDataProvider";
 import { useAsyncData } from "@/lib/hooks";
 import { searchPlaces } from "@/services/placeService";
 import type { FoodPlaceCategory } from "@/types";
@@ -15,12 +16,13 @@ import { heritageList } from "@/data/heritages";
 /**
  * Locates real grocery stores and markets near the user that are likely to
  * carry this recipe's ingredients, by matching on heritage and sorting by
- * distance. Reuses the same Places dataset and service as "Food Near You" so
- * results stay in sync — no separate ingredient-sourcing data to maintain.
+ * distance. Reuses the same verified places and service as "Food Near You" so
+ * results stay in sync.
  */
 export function IngredientsNearYou({ heritages }: { heritages: string[] }) {
   const user = useUser();
   const hasLocation = user.location.lat != null;
+  const live = useLiveVersion();
 
   const filters = useMemo(
     () => ({
@@ -30,14 +32,13 @@ export function IngredientsNearYou({ heritages }: { heritages: string[] }) {
       near: user.location.lat != null ? { lat: user.location.lat, lng: user.location.lng! } : undefined,
       radiusMiles: 100,
     }),
-    // `heritages` is the recipe's own array (from static data), stable for
-    // the component's lifetime, so depending on it directly is safe here.
+    // `heritages` is the recipe's own array, stable for the component's lifetime.
     [heritages, user.location.lat, user.location.lng],
   );
 
   // No minResults here: backfilling with a wrong-heritage grocery store just
   // to hit a count would misdirect someone shopping for this specific recipe.
-  const { data, loading } = useAsyncData(() => searchPlaces(filters), JSON.stringify(filters));
+  const { data, loading } = useAsyncData(() => searchPlaces(filters), `${JSON.stringify(filters)}|${live}`);
 
   const results = (data?.items ?? []).slice(0, 3);
 

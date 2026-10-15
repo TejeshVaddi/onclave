@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ExternalLink, Globe, Loader2, ShieldAlert } from "lucide-react";
+import { ExternalLink, Globe, Loader2 } from "lucide-react";
 import { fetchLiveResults } from "@/services/liveSearch";
 import type { LiveResultItem, LiveSearchCategory, LiveSource } from "@/services/gemini/types";
 import { Badge, Tag } from "@/components/ui/Badge";
@@ -51,18 +51,15 @@ function badgeFor(item: LiveResultItem): string {
 }
 
 /**
- * Renders Gemini-backed live results underneath a page's local-dataset
- * results. Stays completely invisible (renders null) whenever no
- * GEMINI_API_KEY is configured on the server, the query is too short, or a
- * request is in flight with nothing yet to show — so the app looks and
- * behaves exactly as it always has until a key is added.
+ * Real results for what was typed in a search bar, found on the web and
+ * confirmed to exist by the server. Renders nothing while the query is too
+ * short, when search isn't configured, or when nothing was confirmed.
  */
 export function LiveResultsSection({ category, query, heritages, city, state }: Props) {
   const [loading, setLoading] = useState(false);
   const [items, setItems] = useState<LiveResultItem[]>([]);
   const [sources, setSources] = useState<LiveSource[]>([]);
   const [configured, setConfigured] = useState(true);
-  const [grounded, setGrounded] = useState(true);
 
   useEffect(() => {
     if (query.trim().length < MIN_QUERY_LENGTH) {
@@ -78,7 +75,6 @@ export function LiveResultsSection({ category, query, heritages, city, state }: 
       setConfigured(res.configured);
       setItems(res.configured ? res.results : []);
       setSources(res.sources ?? []);
-      setGrounded(res.grounded !== false);
       setLoading(false);
     });
     return () => {
@@ -93,21 +89,9 @@ export function LiveResultsSection({ category, query, heritages, city, state }: 
     <div className="mt-6 rounded-3xl border border-dashed border-terracotta/40 bg-terracotta-soft/30 p-4 md:p-5">
       <div className="flex items-center gap-2">
         <Globe className="h-4 w-4 text-terracotta" aria-hidden />
-        <h3 className="text-xs font-bold uppercase tracking-wider text-terracotta-deep">Live results from the web</h3>
+        <h3 className="text-xs font-bold uppercase tracking-wider text-terracotta-deep">More results for your search</h3>
         {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin text-terracotta" aria-hidden /> : null}
       </div>
-      {!loading ? (
-        grounded ? (
-          <p className="mt-1 text-xs text-brown-muted">
-            Found by Gemini with Google Search just now, separate from Onclave&apos;s demo dataset. Double-check details before relying on them.
-          </p>
-        ) : (
-          <p className="mt-1 flex items-start gap-1.5 text-xs text-terracotta-deep">
-            <ShieldAlert className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden />
-            Google Search grounding isn&apos;t available on this account right now, so these are Gemini&apos;s own best guesses, not independently verified. Confirm before relying on them.
-          </p>
-        )
-      ) : null}
 
       {loading && items.length === 0 ? (
         <div className="mt-3 grid gap-3 sm:grid-cols-2">
@@ -137,7 +121,7 @@ export function LiveResultsSection({ category, query, heritages, city, state }: 
               ) : null}
               {item.externalUrl ? (
                 <Button variant="outline" size="sm" className="mt-3" href={item.externalUrl} external iconRight={<ExternalLink className="h-3.5 w-3.5" aria-hidden />}>
-                  View
+                  Visit page
                 </Button>
               ) : null}
             </div>

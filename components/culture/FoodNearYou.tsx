@@ -3,6 +3,8 @@
 import { useMemo, useState } from "react";
 import { UtensilsCrossed } from "lucide-react";
 import { useAppState } from "@/components/providers/AppStateProvider";
+import { useLiveVersion } from "@/components/providers/LiveDataProvider";
+import { LiveStatus } from "@/components/ui/LiveStatus";
 import { useAsyncData, useDebouncedValue } from "@/lib/hooks";
 import { PlaceCard } from "@/components/cards/PlaceCard";
 import { SearchInput } from "@/components/ui/Input";
@@ -10,8 +12,6 @@ import { Chip, ChipRow } from "@/components/ui/Chip";
 import { Button } from "@/components/ui/Button";
 import { SkeletonGrid } from "@/components/ui/Skeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { DemoNote } from "@/components/ui/DemoNote";
-import { BackfillNote } from "@/components/ui/BackfillNote";
 import { DetectedSignals } from "@/components/ui/DetectedSignals";
 import { LiveResultsSection } from "@/components/ui/LiveResultsSection";
 import { FOOD_CATEGORIES, searchPlaces } from "@/services/placeService";
@@ -22,6 +22,7 @@ import type { FoodPlaceCategory } from "@/types";
 
 export function FoodNearYou() {
   const { user } = useAppState();
+  const live = useLiveVersion();
   const [query, setQuery] = useState("");
   const debouncedQuery = useDebouncedValue(query, 200);
   const [categories, setCategories] = useState<FoodPlaceCategory[]>([]);
@@ -47,7 +48,7 @@ export function FoodNearYou() {
     }),
     [debouncedQuery, queryHandledStructurally, effectiveHeritages, effectiveCategories, user.location.lat, user.location.lng],
   );
-  const { data, loading } = useAsyncData(() => searchPlaces(filters, 5), JSON.stringify(filters), { keepPrevious: true });
+  const { data, loading } = useAsyncData(() => searchPlaces(filters, 5), `${JSON.stringify(filters)}|${live}`, { keepPrevious: true });
   const places = data?.items ?? [];
 
   function clearAll() {
@@ -74,7 +75,8 @@ export function FoodNearYou() {
 
       <p className="mt-5 text-sm text-brown-muted">{loading ? "Searching…" : `${places.length} places found near ${user.location.city}`}</p>
 
-      {!loading && data?.backfilled ? <BackfillNote exactCount={data.exactCount} outsideRadius={data.outsideRadius} className="mt-3" /> : null}
+
+      <LiveStatus noun="restaurants, grocers, and bakeries" />
 
       <div className="mt-3">
         {loading ? (
@@ -101,9 +103,6 @@ export function FoodNearYou() {
 
       <LiveResultsSection category="food" query={debouncedQuery} heritages={effectiveHeritages} city={user.location.city} state={user.location.state ?? ""} />
 
-      <DemoNote className="mt-6">
-        Locations shown are illustrative demo entries around the Washington, DC metro area. A production build would call a Places API (Google Places, Yelp, or Foursquare) using the user&apos;s real location.
-      </DemoNote>
     </div>
   );
 }

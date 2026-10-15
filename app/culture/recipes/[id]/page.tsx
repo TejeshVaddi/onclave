@@ -9,7 +9,6 @@ import { formatMinutes } from "@/lib/format";
 import { Badge, Tag } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { CoverArt } from "@/components/ui/CoverArt";
-import { DemoNote } from "@/components/ui/DemoNote";
 import { IngredientsNearYou } from "@/components/culture/IngredientsNearYou";
 import { getRecipeDetail } from "@/data/recipeDetails";
 
@@ -106,9 +105,6 @@ export default async function RecipeDetailPage({ params }: PageProps<"/culture/r
             </Button>
           </div>
 
-          <DemoNote className="mt-6">
-            Recipes are original write-ups for the Onclave demo, scaled to the serving count shown. Adjust seasoning to taste, and always cook meat, poultry, and fish to a safe internal temperature.
-          </DemoNote>
         </div>
       </div>
     </div>
